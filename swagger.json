@@ -1,0 +1,65 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"version": "1.0.0",
+		"title": "Small BLOG API ",
+		"description": "just a small blog using PERN",
+		"license": {
+			"name": "MIT",
+			"url": "https://opensource.org/licenses/MIT"
+		}
+	},
+	"host": "localhost:3000",
+	"basePath": "/",
+	"tags": [
+		{
+			"name": "Blog & Social",
+			"description": "API where people share ideas and stuff"
+		}
+	],
+	"schemes": ["http"],
+	"consumes": ["application/json"],
+	"produces": ["application/json"],
+	"paths": {
+		"/users": {
+			"get": {
+				"description": "Returns all users from the system ",
+				"produces": ["application/json"],
+				"responses": {
+					"200": {
+						"description": "A list of users.",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/Item"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"definitions": {
+		"Item": {
+			"type": "object",
+			"required": ["_id", "title", "price"],
+			"properties": {
+				"_id": {
+					"type": "string"
+				},
+				"title": {
+					"type": "string"
+				},
+				"price": {
+					"type": "integer"
+				},
+				"description": {
+					"type": "string"
+				}
+			}
+		},
+		"items": {
+			"$ref": "#/definitions/Item"
+		}
+	}
+}

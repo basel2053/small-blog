@@ -74,6 +74,9 @@ const userRoutes = (app: Application): void => {
 	app.get('/users', index);
 	app.get('/users/:id', show);
 	app.delete('/users/:id', remove);
+	app.patch('/users/:id', update);
+	app.post('/signup', create);
+	app.post('/login', authenticate);
 };
 
 export default userRoutes;
