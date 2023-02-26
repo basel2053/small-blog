@@ -1,6 +1,7 @@
-const cloudinary = require('cloudinary');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const multer = require('multer');
+import multer, { FileFilterCallback } from 'multer';
+import cloudinary from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { Request } from 'express';
 
 const cloud = cloudinary.v2;
 
@@ -13,16 +14,25 @@ cloud.config({
 const cloudStorage = new CloudinaryStorage({
 	cloudinary: cloud,
 	params: {
-		public_id: (req, file) => `${file.originalname.split('.')[0]}-${Date.now()}`,
+		public_id: (_req: Request, file: Express.Multer.File) =>
+			`${file.originalname.split('.')[0]}-${Date.now()}`,
 	},
 });
-const fileFilter = (req, file, cb) => {
-	if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+const fileFilter = (
+	_req: Request,
+	file: Express.Multer.File,
+	cb: FileFilterCallback
+) => {
+	if (
+		file.mimetype === 'image/png' ||
+		file.mimetype === 'image/jpg' ||
+		file.mimetype === 'image/jpeg'
+	) {
 		cb(null, true);
 	} else {
-		cb(new ApiError('Only Images allowed', 400), false); // false if exist error (failed)
+		// cb(new ApiError('Only Images allowed', 400), false); // false if exist error (failed)
 	}
 };
 
 const upload = multer({ storage: cloudStorage, fileFilter: fileFilter });
-module.exports = upload;
+export default upload;
