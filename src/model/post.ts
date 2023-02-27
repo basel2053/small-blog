@@ -30,11 +30,11 @@ export class Post {
 			throw new Error(`Cannot get post ${id}, ${err}`);
 		}
 	}
-	async update(post: TPost): Promise<TPost> {
+	async update(id: string, password: string): Promise<TPost> {
 		try {
 			const conn = await Client.connect();
 			const sql = 'UPDATE posts SET password=$1 WHERE id=$2 RETURNING *';
-			const result = await conn.query(sql, [post]);
+			const result = await conn.query(sql, [password, id]);
 			conn.release();
 			return result.rows[0];
 		} catch (err) {

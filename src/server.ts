@@ -5,6 +5,7 @@ import swaggerUI from 'swagger-ui-express';
 import dotenv from 'dotenv';
 import swaggerDocument from '../swagger.json';
 import userRoutes from './handler/user';
+import postRoutes from './handler/post';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 userRoutes(app);
+postRoutes(app);
 
 app.listen(port, () => {
 	console.log(`server is running up on http://localhost:${port}`);

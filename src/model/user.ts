@@ -88,8 +88,7 @@ export class User {
 			conn.release();
 			if (result.rows.length) {
 				const user = result.rows[0];
-				const isValid = await bcrypt.compare(password + PEPPER, user.password);
-				if (isValid) {
+				if (await bcrypt.compare(password + PEPPER, user.password)) {
 					return user;
 				}
 			}
