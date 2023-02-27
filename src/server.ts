@@ -13,7 +13,7 @@ const app: express.Application = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
@@ -24,6 +24,3 @@ app.listen(port, () => {
 });
 
 export default app;
-
-// NOTE  const token = req.cookies['auth-token']; reading cookie
-// res.clearCookie('key')

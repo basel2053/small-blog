@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "",
+		"start": "start ./dist/server.js",
 		"dev": "nodemon ./src/server.ts",
 		"test": "set ENV=test && mocha -t 5000",
 		"m-up": "db-migrate up",
