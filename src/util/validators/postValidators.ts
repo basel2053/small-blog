@@ -1,31 +1,28 @@
-import validator from 'validator';
+import { body, param, oneOf } from 'express-validator';
 
-function title(input: string) {
-  return (
-    validator.isAlpha(input) ||
-    !validator.isEmpty(input) ||
-    validator.isLength(input, { min: 4, max: 60 })
-  );
-}
-function description(input: string) {
-  return !validator.isEmpty(input) || validator.isLength(input, { min: 60 });
-}
-
-const validators = {
-  title,
-  description,
+export const validatePostCreate = () => {
+  return [
+    body('title', 'invalid title')
+      .notEmpty()
+      .isAlphanumeric()
+      .isLength({ min: 3, max: 40 }),
+    body('description', 'invalid description').notEmpty().isLength({ min: 20 }),
+  ];
 };
 
-const postValidator = (body: { title: string; description: string }) => {
-  for (const field in body) {
-    if (
-      validators[field as keyof typeof validators](
-        body[field as keyof typeof body] + ''
-      )
-    ) {
-      return field;
-    }
-  }
+export const validatePostUpdate = () => {
+  return [
+    param('postId').notEmpty().isNumeric(),
+    oneOf([
+      body('title', 'invalid title')
+        .exists()
+        .isAlphanumeric()
+        .isLength({ min: 3, max: 40 }),
+      body('description', 'invalid description').exists().isLength({ min: 20 }),
+    ]),
+  ];
 };
 
-export default postValidator;
+export const validatePostDelete = () => {
+  return [param('postId').notEmpty().isNumeric()];
+};

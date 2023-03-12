@@ -1,1 +1,1 @@
-DROP TABLE post;
+DROP TABLE posts;

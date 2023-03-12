@@ -1,9 +1,17 @@
-import { Application, Request, Response } from 'express';
+import { Application, Request, Response, NextFunction } from 'express';
 import { User } from '../model/user';
 import signToken from '../util/signToken';
 import validation from '../middleware/validation';
-import userValidator from '../util/validators/userValidators';
+import verifyToken from '../middleware/verifyToken';
+
+import APIError from '../Error/ApiError';
+
 import dotenv from 'dotenv';
+import {
+  validateUserUpdate,
+  validateUserCreate,
+  validateUserAuthenticate,
+} from '../util/validators/userValidators';
 dotenv.config();
 
 const store = new User();
@@ -42,31 +50,62 @@ const remove = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const update = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const user = await store.update(req.params.id, req.body.password);
-    res.json({ message: 'updated the user ', data: user });
-  } catch (err) {
-    throw new Error(`couldn't update user,${req.params.id} , ${err}`);
+const update = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const user = await store.update(req.params.id, req.body.password);
+  if (!user) {
+    return next(
+      new APIError(
+        `couldn't update user ${req.params.id}`,
+        422,
+        'failed while trying to update the user',
+        true
+      )
+    );
   }
+  res.json({ message: 'updated the user ', data: user });
 };
 
-const create = async (req: Request, res: Response): Promise<void> => {
-  try {
-    // validation middleware
-    const user = await store.create(req.body);
-
-    res.json({ message: 'user created', user });
-  } catch (err) {
-    throw new Error(`couldn't find user,${req.params.id} , ${err}`);
+const create = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  // validation middleware
+  const user = await store.create(req.body);
+  if (!user) {
+    return next(
+      new APIError(
+        `couldn't update user ${req.params.id}`,
+        404,
+        'failed while trying to update the user',
+        true
+      )
+    );
   }
+  res.status(201).json({ message: 'user created', user });
 };
 
-const authenticate = async (req: Request, res: Response): Promise<void> => {
+const authenticate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const user = await store.authenticate(req.body.email, req.body.password);
+    const { email, password } = req.body;
+    const user = await store.authenticate(email, password);
     if (!user) {
-      throw new Error(`cannot authenticate user ${req.body.email}`);
+      return next(
+        new APIError(
+          `cannot authenticate user ${email}`,
+          404,
+          'failed to authenticate the user',
+          true
+        )
+      );
     }
     const token = signToken(user, JWT_SECRET + '', JWT_ACCESS_EXPIRY + '');
     const refreshToken = signToken(
@@ -74,7 +113,7 @@ const authenticate = async (req: Request, res: Response): Promise<void> => {
       JWT_REFRESH_SECRET + '',
       JWT_REFRESH_EXPIRY + ''
     );
-
+    await store.storeToken(email, refreshToken);
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
@@ -82,17 +121,24 @@ const authenticate = async (req: Request, res: Response): Promise<void> => {
 
     res.json({ message: 'user signed in', accessToken: token });
   } catch (err) {
-    throw new Error(`couldn't find user,${req.params.id} , ${err}`);
+    throw new Error(`couldn't authenticate user, ${req.body.email} , ${err}`);
   }
 };
 
 const userRoutes = (app: Application): void => {
+  // ! Development purpose only
   app.get('/users', index);
-  app.get('/users/:id', show);
   app.delete('/users/:id', remove);
-  app.patch('/users/:id', validation(userValidator), update);
-  app.post('/signup', validation(userValidator), create);
-  app.post('/login', validation(userValidator), authenticate);
+  app.patch('/users/:id', validateUserUpdate(), validation, update);
+  // HERE  . our used routes
+  app.get('/users/:id', verifyToken, show);
+  app.post('/users/signup', validateUserCreate(), validation, create);
+  app.post(
+    '/users/login',
+    validateUserAuthenticate(),
+    validation,
+    authenticate
+  );
 };
 
 export default userRoutes;

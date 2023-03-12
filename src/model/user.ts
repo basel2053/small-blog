@@ -37,7 +37,7 @@ export class User {
     }
   }
 
-  async update(id: string, password: string): Promise<TUser> {
+  async update(id: string, password: string): Promise<TUser | undefined> {
     try {
       const conn = await Client.connect();
       const sql = 'UPDATE users SET password=$1 WHERE id=$2 RETURNING *';
@@ -46,7 +46,7 @@ export class User {
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Cannot update user ${id}, ${err}`);
+      console.log(`Cannot get user ${id}, ${err}`);
     }
   }
 
@@ -66,7 +66,7 @@ export class User {
     try {
       const conn = await Client.connect();
       const sql =
-        'INSERT INTO users(email,password,name) VALUES ($1,$2,$3) RETURNING *';
+        'INSERT INTO users(email,password,name) VALUES ($1,$2,$3) RETURNING email,name';
       const hashedPassword = await bcrypt.hash(
         user.password + PEPPER,
         Number(SR)
@@ -99,6 +99,30 @@ export class User {
       return null;
     } catch (err) {
       throw new Error(`Cannot Find user ${email}, ${err}`);
+    }
+  }
+
+  // ? for validation purpose
+  static async showByEmail(email: string): Promise<TUser> {
+    try {
+      const conn = await Client.connect();
+      const sql = 'SELECT email FROM users WHERE email=$1';
+      const result = await conn.query(sql, [email]);
+      conn.release();
+      return result.rows[0];
+    } catch (err) {
+      throw new Error(`Cannot Find user ${email}, ${err}`);
+    }
+  }
+
+  async storeToken(email: string, token: string): Promise<void> {
+    try {
+      const conn = await Client.connect();
+      const sql = 'UPDATE users SET refresh_token=$1 WHERE email=$2';
+      await conn.query(sql, [token, email]);
+      conn.release();
+    } catch (err) {
+      throw new Error(`Couldn't insert user ${email} refresh token, ${err}`);
     }
   }
 }

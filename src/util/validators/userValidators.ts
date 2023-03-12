@@ -1,39 +1,57 @@
-import validator from 'validator';
+import { body, param } from 'express-validator';
 
-function email(input: string) {
-  return validator.isEmail(input);
-}
-function password(input: string) {
-  return (
-    validator.isAlpha(input) &&
-    !validator.isEmpty(input) &&
-    validator.isLength(input, { min: 6, max: 16 })
-  );
-}
-function name(input: string) {
-  return validator.isLength(input, { min: 2, max: 24 });
-}
+import { User } from '../../model/user';
 
-const validators = {
-  email,
-  password,
-  name,
+export const validateUserCreate = () => {
+  return [
+    body('email', 'invalid email')
+      .notEmpty()
+      .isEmail()
+      .custom(async (value: string) => {
+        const user = await User.showByEmail(value);
+        if (user) {
+          return Promise.reject('E-mail already in use');
+        }
+      }),
+    body('password', 'Invalid password should be 6-16 characters')
+      .isAlphanumeric()
+      .isLength({ min: 6, max: 16 })
+      .notEmpty()
+      .custom((value: string, { req }) => {
+        if (value !== req.body.confirmPassword) {
+          throw new Error('Password confirmation does not match password');
+        }
+        return true;
+      }),
+    body('name', 'invalid name')
+      .optional()
+      .isAlphanumeric()
+      .isLength({ min: 2, max: 40 }),
+  ];
 };
 
-const userValidator = (body: {
-  email: string;
-  password: string;
-  name?: string;
-}) => {
-  for (const field in body) {
-    if (
-      validators[field as keyof typeof validators](
-        body[field as keyof typeof body] + ''
-      )
-    ) {
-      return field;
-    }
-  }
+export const validateUserUpdate = () => {
+  return [
+    body('password', 'Invalid password should be 6-16 characters')
+      .isAlphanumeric()
+      .isLength({ min: 6, max: 16 })
+      .notEmpty()
+      .custom((value: string, { req }) => {
+        if (value !== req.body.confirmPassword) {
+          throw new Error('Password confirmation does not match password');
+        }
+        return true;
+      }),
+    param('id').notEmpty().isNumeric(),
+  ];
 };
 
-export default userValidator;
+export const validateUserAuthenticate = () => {
+  return [
+    body('email', 'invalid email').notEmpty().isEmail(),
+    body('password', 'Invalid password should be 6-16 characters')
+      .isAlphanumeric()
+      .isLength({ min: 6, max: 16 })
+      .notEmpty(),
+  ];
+};
