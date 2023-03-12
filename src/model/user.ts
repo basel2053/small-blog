@@ -10,6 +10,7 @@ export type TUser = {
   email: string;
   password: string;
   name?: string;
+  refreshtoken?: string;
 };
 
 export class User {
@@ -92,7 +93,7 @@ export class User {
       if (result.rows.length) {
         const user = result.rows[0];
         if (await bcrypt.compare(password + PEPPER, user.password)) {
-          const { password: pwd, ...info } = user;
+          const { password: pwd, refreshtoken, ...info } = user;
           return info;
         }
       }
@@ -118,7 +119,7 @@ export class User {
   async storeToken(email: string, token: string): Promise<void> {
     try {
       const conn = await Client.connect();
-      const sql = 'UPDATE users SET refresh_token=$1 WHERE email=$2';
+      const sql = 'UPDATE users SET refreshToken=$1 WHERE email=$2';
       await conn.query(sql, [token, email]);
       conn.release();
     } catch (err) {

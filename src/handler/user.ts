@@ -114,6 +114,7 @@ const authenticate = async (
       JWT_REFRESH_EXPIRY + ''
     );
     await store.storeToken(email, refreshToken);
+
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,

@@ -25,7 +25,7 @@ app.use(
 app.use(morgan('dev'));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
-app.use('/images', express.static('upload'));
+app.use('/images', express.static('uploads'));
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 userRoutes(app);

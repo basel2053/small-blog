@@ -21,7 +21,7 @@ const fileFilter = (
     cb(
       new APIError(
         'Only Images allowed',
-        400,
+        415,
         'cannot let the user upload other than images.',
         true
       )

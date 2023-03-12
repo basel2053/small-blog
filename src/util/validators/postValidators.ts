@@ -2,11 +2,11 @@ import { body, param, oneOf } from 'express-validator';
 
 export const validatePostCreate = () => {
   return [
-    body('title', 'invalid title')
+    body('title', 'Invalid title')
       .notEmpty()
-      .isAlphanumeric()
+      .isString()
       .isLength({ min: 3, max: 40 }),
-    body('description', 'invalid description').notEmpty().isLength({ min: 20 }),
+    body('description', 'Invalid description').notEmpty().isLength({ min: 16 }),
   ];
 };
 
@@ -16,7 +16,7 @@ export const validatePostUpdate = () => {
     oneOf([
       body('title', 'invalid title')
         .exists()
-        .isAlphanumeric()
+        .isString()
         .isLength({ min: 3, max: 40 }),
       body('description', 'invalid description').exists().isLength({ min: 20 }),
     ]),
