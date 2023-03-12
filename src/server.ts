@@ -13,7 +13,12 @@ const app: express.Application = express();
 
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.WHITE_LISTED,
+    optionsSuccessStatus: 200,
+  })
+);
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
 app.use('/images', express.static('upload'));

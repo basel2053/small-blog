@@ -1,6 +1,6 @@
 import multer, { FileFilterCallback } from 'multer';
 import { Request } from 'express';
-import APIError from 'Error/ApiError';
+import APIError from '../Error/ApiError';
 // import { v4 as uuidv4 } from 'uuid';
 
 // type DestinationCallback = (error: Error | null, destination: string) => void;

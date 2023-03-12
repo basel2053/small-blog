@@ -1,4 +1,4 @@
-import APIError from 'Error/ApiError';
+import APIError from '../Error/ApiError';
 import { NextFunction, Request, Response } from 'express';
 
 const validation =

@@ -10,14 +10,13 @@ export type TUser = {
   email: string;
   password: string;
   name?: string;
-  age: number;
 };
 
 export class User {
   async index(): Promise<TUser[]> {
     try {
       const conn = await Client.connect();
-      const sql = 'SELECT email,name,age FROM users';
+      const sql = 'SELECT email,name FROM users';
       const result = await conn.query(sql);
       conn.release();
       return result.rows;
@@ -29,7 +28,7 @@ export class User {
   async show(id: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = 'SELECT email,name,age FROM users WHERE id=$1';
+      const sql = 'SELECT email,name FROM users WHERE id=$1';
       const result = await conn.query(sql, [id]);
       conn.release();
       return result.rows[0];
@@ -67,7 +66,7 @@ export class User {
     try {
       const conn = await Client.connect();
       const sql =
-        'INSERT INTO users(email,password,name,age) VALUES ($1,$2,$3,$4) RETURNING *';
+        'INSERT INTO users(email,password,name) VALUES ($1,$2,$3) RETURNING *';
       const hashedPassword = await bcrypt.hash(
         user.password + PEPPER,
         Number(SR)
@@ -76,7 +75,6 @@ export class User {
         user.email,
         hashedPassword,
         user.name,
-        user.age,
       ]);
       conn.release();
       return result.rows[0];
@@ -94,7 +92,8 @@ export class User {
       if (result.rows.length) {
         const user = result.rows[0];
         if (await bcrypt.compare(password + PEPPER, user.password)) {
-          return user;
+          const { password: pwd, ...info } = user;
+          return info;
         }
       }
       return null;
