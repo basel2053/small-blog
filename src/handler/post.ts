@@ -42,10 +42,36 @@ const create = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const update = async (req: Request, res: Response): Promise<void> => {
+const update = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void | Response> => {
   try {
-    // validation middleware
-    const post = await store.update(req.params.postId, req.body.password);
+    const post = await store.update(
+      req.params.postId,
+      req.body,
+      +res.locals.userId
+    );
+    if (!post) {
+      return next(
+        new APIError(
+          `couldn't find post ${req.params.postId} to update`,
+          404,
+          'failed to find the post',
+          true
+        )
+      );
+    }
+    if (req.body.image) {
+      try {
+        await unlink(post.image);
+      } catch (err) {
+        return res
+          .status(500)
+          .json({ warning: "Image wasn't deleted, path error", data: post });
+      }
+    }
     res.json({ message: 'posts updated sucessfully', data: post });
   } catch (err) {
     throw new Error(`couldn't updated post , ${err}`);
@@ -57,11 +83,11 @@ const remove = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const post = await store.delete(req.params.postId);
+    const post = await store.delete(req.params.postId, +res.locals.userId);
     if (!post) {
       return next(
         new APIError(
-          `couldn't delete user ${req.params.postId}`,
+          `couldn't find post ${req.params.postId} to delete`,
           404,
           'failed to find the post',
           true

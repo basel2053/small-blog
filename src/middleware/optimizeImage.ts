@@ -7,6 +7,9 @@ const optimizeImage = async (
   res: Response,
   next: NextFunction
 ) => {
+  if (!req.file && req.method === 'PATCH') {
+    return next();
+  }
   const path = `uploads/${uuidv4()} - ${req.file?.originalname}.${
     req.file?.mimetype.split('/')[1]
   }`;

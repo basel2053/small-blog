@@ -33,25 +33,43 @@ export class Post {
     }
   }
 
-  async update(id: string, password: string): Promise<TPost> {
+  async update(id: string, post: TPost, userId: number): Promise<TPost | null> {
     try {
       const conn = await Client.connect();
-      const sql = 'UPDATE posts SET password=$1 WHERE id=$2 RETURNING *';
-      const result = await conn.query(sql, [password, id]);
+      const sql = 'SELECT user_id,image FROM posts WHERE id=$1';
+      const result = await conn.query(sql, [id]);
+      if (!result.rows[0] || result.rows[0].user_id !== userId) {
+        conn.release();
+        return null;
+      }
+      const sql2 =
+        'UPDATE posts SET title=$1,description=$2,image=$3 WHERE id=$4 RETURNING *';
+      const result2 = await conn.query(sql2, [
+        post.title,
+        post.description,
+        post.image ? post.image : result.rows[0].image,
+        id,
+      ]);
       conn.release();
-      return result.rows[0];
+      return result2.rows[0];
     } catch (err) {
       throw new Error(`Cannot update post ${id}, ${err}`);
     }
   }
 
-  async delete(id: string): Promise<TPost> {
+  async delete(id: string, userId: number): Promise<TPost | null> {
     try {
       const conn = await Client.connect();
-      const sql = 'DELETE FROM posts WHERE id=$1 RETURNING *';
+      const sql = 'SELECT user_id FROM posts WHERE id=$1';
       const result = await conn.query(sql, [id]);
+      if (!result.rows[0] || result.rows[0].user_id !== userId) {
+        conn.release();
+        return null;
+      }
+      const sql2 = 'DELETE FROM posts WHERE id=$1 RETURNING *';
+      const result2 = await conn.query(sql2, [id]);
       conn.release();
-      return result.rows[0];
+      return result2.rows[0];
     } catch (err) {
       throw new Error(`Cannot delete post ${id}, ${err}`);
     }

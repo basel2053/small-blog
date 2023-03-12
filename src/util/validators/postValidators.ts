@@ -1,4 +1,6 @@
-import { body, param, oneOf } from 'express-validator';
+import { body, param } from 'express-validator';
+
+// NOTE   we can use oneOf in update if we only want to at least get 1 field
 
 export const validatePostCreate = () => {
   return [
@@ -13,13 +15,11 @@ export const validatePostCreate = () => {
 export const validatePostUpdate = () => {
   return [
     param('postId').notEmpty().isNumeric(),
-    oneOf([
-      body('title', 'invalid title')
-        .exists()
-        .isString()
-        .isLength({ min: 3, max: 40 }),
-      body('description', 'invalid description').exists().isLength({ min: 20 }),
-    ]),
+    body('title', 'Invalid title')
+      .notEmpty()
+      .isString()
+      .isLength({ min: 3, max: 40 }),
+    body('description', 'Invalid description').notEmpty().isLength({ min: 16 }),
   ];
 };
 
