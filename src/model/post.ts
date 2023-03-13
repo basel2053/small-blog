@@ -95,4 +95,25 @@ export class Post {
       throw new Error(`Cannot create post `);
     }
   }
+
+  // ? pagination
+  async paginate(
+    author: number | null,
+    limit: number,
+    skip: number
+  ): Promise<{ posts: TPost[]; postsCount: number }> {
+    try {
+      const conn = await Client.connect();
+      const sql = 'SELECT id from posts';
+      const result = await conn.query(sql);
+      const sql2 = `SELECT * FROM posts ${
+        author ? 'WHERE user_id=' + author : ''
+      } LIMIT $1 OFFSET $2`;
+      const result2 = await conn.query(sql2, [limit, skip]);
+      conn.release();
+      return { posts: result2.rows, postsCount: result.rowCount };
+    } catch (err) {
+      throw new Error(`Cannot get posts ${err}`);
+    }
+  }
 }

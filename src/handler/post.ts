@@ -16,6 +16,8 @@ import {
 
 const store = new Post();
 
+const postsPerPage = 12;
+
 const index = async (req: Request, res: Response): Promise<void> => {
   try {
     const author = Number(req.query.author) || null;
@@ -25,12 +27,33 @@ const index = async (req: Request, res: Response): Promise<void> => {
     throw new Error(`couldn't get posts, ${err}`);
   }
 };
+
+const paginated = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const skip = (page - 1) * postsPerPage;
+    const author = Number(req.query.author) || null;
+    const postsInfo = await store.paginate(author, postsPerPage, skip);
+    const postsCount = postsInfo.postsCount;
+    const numberOfPages = Math.ceil(postsCount / postsPerPage);
+    const next = page * postsPerPage < postsCount ? page + 1 : false;
+    const prev = page > 1 ? page - 1 : false;
+    res.json({
+      message: 'retrived posts sucessfully',
+      data: postsInfo.posts,
+      pagination: { postsCount, numberOfPages, page, next, prev },
+    });
+  } catch (err) {
+    throw new Error(`couldn't get posts, ${err}`);
+  }
+};
+
 const show = async (req: Request, res: Response): Promise<void> => {
   try {
     const post = await store.show(req.params.postId);
     res.json({ message: 'retrived posts sucessfully', data: post });
   } catch (err) {
-    throw new Error(`couldn't get the post ${req.params.postId}, ${err}`);
+    res.sendStatus(404);
   }
 };
 const create = async (req: Request, res: Response): Promise<void> => {
@@ -127,6 +150,8 @@ const postRoutes = (app: Application) => {
       optimizeImage,
       update
     );
+
+  app.get('/pagination', paginated);
 };
 
 export default postRoutes;
