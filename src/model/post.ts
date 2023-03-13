@@ -116,4 +116,33 @@ export class Post {
       throw new Error(`Cannot get posts ${err}`);
     }
   }
+
+  // ? for filteration, search, and pagination
+  async filter(
+    author: number | null,
+    query: string | null,
+    limit: number,
+    skip: number
+  ): Promise<{ posts: TPost[]; postsCount: number }> {
+    try {
+      const whereQuery = `${author || query ? 'WHERE' : ''}`;
+      const andQuery = `${author && query ? 'AND' : ''}`;
+      const authorQuery = `${author ? 'user_id=' + author : ''}`;
+      const searchQuery = `${query ? `LOWER(title) LIKE ${query}%` : ''}`;
+      const myUltimateQuery = `SELECT * FROM posts ${whereQuery} ${authorQuery} ${andQuery} ${searchQuery}`;
+
+      // ! NOTE if it work properly try to add these variables as $(variables) in the conn.query instead of putting all of it in the string
+
+      const conn = await Client.connect();
+      const sql = myUltimateQuery;
+      const result = await conn.query(sql);
+      const sql2 = `${myUltimateQuery} LIMIT $1 OFFSET $2`;
+      console.log(sql2);
+      const result2 = await conn.query(sql2, [limit, skip]);
+      conn.release();
+      return { posts: result2.rows, postsCount: result.rowCount };
+    } catch (err) {
+      throw new Error(`Cannot get posts ${err}`);
+    }
+  }
 }
