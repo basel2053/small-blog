@@ -10,7 +10,7 @@ export type TUser = {
   email: string;
   password: string;
   name?: string;
-  refreshtoken?: string;
+  refreshtoken?: string[];
 };
 
 export class User {
@@ -93,7 +93,7 @@ export class User {
       if (result.rows.length) {
         const user = result.rows[0];
         if (await bcrypt.compare(password + PEPPER, user.password)) {
-          const { password: pwd, refreshtoken, ...info } = user;
+          const { password: pwd, ...info } = user;
           return info;
         }
       }
@@ -104,10 +104,10 @@ export class User {
   }
 
   // ? for validation purpose
-  static async showByField(value: string, field: string): Promise<TUser> {
+  async showByField(value: string, field: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = `SELECT id,email FROM users WHERE ${field}=$1`;
+      const sql = `SELECT id,email,refreshToken FROM users WHERE ${field}=$1`;
       const result = await conn.query(sql, [value]);
       conn.release();
       return result.rows[0];
@@ -117,7 +117,7 @@ export class User {
   }
 
   // ? for removing the refresh token on logout
-  static async deleteRefreshToken(id: string): Promise<void> {
+  async deleteRefreshToken(id: string): Promise<void> {
     try {
       const conn = await Client.connect();
       const sql = `UPDATE users SET refreshToken=NULL WHERE id=$1`;
@@ -128,7 +128,7 @@ export class User {
     }
   }
 
-  async storeToken(email: string, token: string): Promise<void> {
+  async storeToken(email: string, token: string[]): Promise<void> {
     try {
       const conn = await Client.connect();
       const sql = 'UPDATE users SET refreshToken=$1 WHERE email=$2';

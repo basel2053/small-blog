@@ -4,7 +4,14 @@ import { User } from './../model/user';
 import { Application, NextFunction, Request, Response } from 'express';
 import signToken from '../util/signToken';
 
-const { JWT_REFRESH_SECRET, JWT_ACCESS_EXPIRY, JWT_SECRET } = process.env;
+const {
+  JWT_REFRESH_SECRET,
+  JWT_REFRESH_EXPIRY,
+  JWT_ACCESS_EXPIRY,
+  JWT_SECRET,
+} = process.env;
+
+const store = new User();
 
 const refreshToken = async (
   req: Request,
@@ -23,9 +30,23 @@ const refreshToken = async (
       );
     }
     const jwtRefresh = req.cookies['refresh-token'];
-    const user = await User.showByField(jwtRefresh, 'refreshtoken');
+    res.clearCookie('refresh-token', {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    const user = await store.showByField(jwtRefresh, 'refreshtoken');
     // ! remember to remove the refresh token from the database (make it one time use only)
+    console.log(user);
     if (!user) {
+      verify(
+        jwtRefresh,
+        JWT_REFRESH_SECRET as string,
+        async (err: VerifyErrors | null, payload: any) => {
+          if (err) return res.sendStatus(403);
+          // ? with the refresh token rotation here we know that invalid token (resuse attempt)
+          await store.deleteRefreshToken(payload?.user.id);
+        }
+      );
       return next(
         new APIError(
           `cannot be accessed`,
@@ -35,18 +56,44 @@ const refreshToken = async (
         )
       );
     }
+
+    const newRefreshTokens = user.refreshtoken?.filter(
+      (rt) => rt !== jwtRefresh
+    ) as Array<string>;
+
     verify(
       jwtRefresh,
       JWT_REFRESH_SECRET as string,
-      (err: VerifyErrors | null, payload: any) => {
+      async (err: VerifyErrors | null, payload: any) => {
+        // ? HERE all good but expired token
+        if (err) {
+          await store.storeToken(user.email, newRefreshTokens);
+        }
         if (err || payload?.user?.email !== user.email)
           return res.sendStatus(403);
 
+        //  ? now we have a valid token
         const accessToken = signToken(
           payload?.user,
           JWT_SECRET + '',
           JWT_ACCESS_EXPIRY + ''
         );
+        const newRefreshToken = signToken(
+          payload?.user,
+          JWT_REFRESH_SECRET + '',
+          JWT_REFRESH_EXPIRY + ''
+        );
+
+        await store.storeToken(payload?.user.email, [
+          ...newRefreshTokens,
+          newRefreshToken,
+        ]);
+
+        res.cookie('refresh-token', newRefreshToken, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+        });
+
         res.json({ message: 'user token refreshed', accessToken });
       }
     );
@@ -76,7 +123,8 @@ const logout = async (
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    const user = await User.showByField(jwtRefresh, 'refreshtoken');
+
+    const user = await store.showByField(jwtRefresh, 'refreshtoken');
     if (!user) {
       return next(
         new APIError(
@@ -87,7 +135,12 @@ const logout = async (
         )
       );
     }
-    await User.deleteRefreshToken(user.id + '');
+
+    const newRefreshTokens = user.refreshtoken?.filter(
+      (rt) => rt !== jwtRefresh
+    ) as Array<string>;
+
+    await store.storeToken(user.email, [...newRefreshTokens]);
     // IMPORTANT  don't forget in production to set secure flag to true in production
     res.sendStatus(204);
   } catch (err) {

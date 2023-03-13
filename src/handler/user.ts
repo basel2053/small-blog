@@ -113,7 +113,9 @@ const authenticate = async (
       JWT_REFRESH_SECRET + '',
       JWT_REFRESH_EXPIRY + ''
     );
-    await store.storeToken(email, refreshToken);
+    user.refreshtoken?.push(refreshToken);
+    const newRefreshTokens = user.refreshtoken as Array<string>;
+    await store.storeToken(email, newRefreshTokens);
 
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
