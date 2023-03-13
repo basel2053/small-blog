@@ -9,10 +9,13 @@ export type TPost = {
 };
 
 export class Post {
-  async index(): Promise<TPost[]> {
+  async index(author: number | null): Promise<TPost[]> {
     try {
       const conn = await Client.connect();
-      const sql = 'SELECT * FROM posts';
+      const sql = `SELECT * FROM posts ${
+        author ? 'WHERE user_id=' + author : ''
+      }`;
+      console.log(sql);
       const result = await conn.query(sql);
       conn.release();
       return result.rows;

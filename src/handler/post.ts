@@ -16,9 +16,10 @@ import {
 
 const store = new Post();
 
-const index = async (_req: Request, res: Response): Promise<void> => {
+const index = async (req: Request, res: Response): Promise<void> => {
   try {
-    const posts = await store.index();
+    const author = Number(req.query.author) || null;
+    const posts = await store.index(author);
     res.json({ message: 'retrived posts sucessfully', data: posts });
   } catch (err) {
     throw new Error(`couldn't get posts, ${err}`);

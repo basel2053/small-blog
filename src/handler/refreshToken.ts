@@ -34,9 +34,9 @@ const refreshToken = async (
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    const user = await store.showByField(jwtRefresh, 'refreshtoken');
+    const user = await store.showByToken(jwtRefresh);
     // ! remember to remove the refresh token from the database (make it one time use only)
-    console.log(user);
+
     if (!user) {
       verify(
         jwtRefresh,
@@ -124,7 +124,7 @@ const logout = async (
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    const user = await store.showByField(jwtRefresh, 'refreshtoken');
+    const user = await store.showByToken(jwtRefresh);
     if (!user) {
       return next(
         new APIError(

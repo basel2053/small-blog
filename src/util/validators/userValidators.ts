@@ -2,13 +2,15 @@ import { body, param } from 'express-validator';
 
 import { User } from '../../model/user';
 
+const store = new User();
+
 export const validateUserCreate = () => {
   return [
     body('email', 'invalid email')
       .notEmpty()
       .isEmail()
       .custom(async (value: string) => {
-        const user = await User.showByField(value, 'email');
+        const user = await store.showByEmail(value);
         if (user) {
           return Promise.reject('E-mail already in use');
         }

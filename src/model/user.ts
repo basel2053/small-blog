@@ -104,10 +104,23 @@ export class User {
   }
 
   // ? for validation purpose
-  async showByField(value: string, field: string): Promise<TUser> {
+  async showByEmail(value: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = `SELECT id,email,refreshToken FROM users WHERE ${field}=$1`;
+      const sql = `SELECT id,email FROM users WHERE email=$1`;
+      const result = await conn.query(sql, [value]);
+      conn.release();
+      return result.rows[0];
+    } catch (err) {
+      throw new Error(`Cannot Find user ${value}, ${err}`);
+    }
+  }
+
+  // ? for checking if user got fresh token or not
+  async showByToken(value: string): Promise<TUser> {
+    try {
+      const conn = await Client.connect();
+      const sql = `SELECT id,email,refreshToken FROM users WHERE $1=ANY(refreshToken)`;
       const result = await conn.query(sql, [value]);
       conn.release();
       return result.rows[0];
