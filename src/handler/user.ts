@@ -95,6 +95,7 @@ const authenticate = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    const jwtCookie = req.cookies['refresh-token'];
     const { email, password } = req.body;
     const user = await store.authenticate(email, password);
     if (!user) {
@@ -113,9 +114,29 @@ const authenticate = async (
       JWT_REFRESH_SECRET + '',
       JWT_REFRESH_EXPIRY + ''
     );
-    user.refreshtoken?.push(refreshToken);
-    const newRefreshTokens = user.refreshtoken as Array<string>;
-    await store.storeToken(email, newRefreshTokens);
+
+    // ? remove the old token if exists in cookie
+    let newRefreshTokens = (
+      !jwtCookie
+        ? user.refreshtoken
+        : user.refreshtoken?.filter((rt) => rt !== jwtCookie)
+    ) as Array<string>;
+
+    if (jwtCookie) {
+      // ! if user logs in, never logs out or use RT (we must check for reuse detection so same refresh token not used in 2 logins or more)
+      const jwtRefresh = jwtCookie;
+      const foundToken = await store.showByField(jwtRefresh, 'refreshtoken');
+      if (!foundToken) {
+        // ? now we are sure the token is deleted and was used before
+        newRefreshTokens = [];
+      }
+      res.clearCookie('refresh-token', {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+    }
+
+    await store.storeToken(email, [...newRefreshTokens, refreshToken]);
 
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
