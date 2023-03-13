@@ -120,7 +120,7 @@ export class Post {
   // ? for filteration, search, and pagination
   async filter(
     author: number | null,
-    query: string | null,
+    query: string | undefined,
     limit: number,
     skip: number
   ): Promise<{ posts: TPost[]; postsCount: number }> {
@@ -128,14 +128,15 @@ export class Post {
       const whereQuery = `${author || query ? 'WHERE' : ''}`;
       const andQuery = `${author && query ? 'AND' : ''}`;
       const authorQuery = `${author ? 'user_id=' + author : ''}`;
-      const searchQuery = `${query ? `LOWER(title) LIKE ${query}%` : ''}`;
+      const searchQuery = `${query ? `LOWER(title) ILIKE '${query}%'` : ''}`;
       const myUltimateQuery = `SELECT * FROM posts ${whereQuery} ${authorQuery} ${andQuery} ${searchQuery}`;
-
       // ! NOTE if it work properly try to add these variables as $(variables) in the conn.query instead of putting all of it in the string
 
       const conn = await Client.connect();
+      console.log(myUltimateQuery);
       const sql = myUltimateQuery;
       const result = await conn.query(sql);
+      console.log('query 1 can run');
       const sql2 = `${myUltimateQuery} LIMIT $1 OFFSET $2`;
       console.log(sql2);
       const result2 = await conn.query(sql2, [limit, skip]);

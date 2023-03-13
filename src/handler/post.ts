@@ -48,12 +48,13 @@ const paginated = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const search = async (req: Request, res: Response): Promise<void> => {
+const filter = async (req: Request, res: Response): Promise<void> => {
   try {
     const page = Number(req.query.page) || 1;
-    const skip = (page - 1) * postsPerPage;
     const author = Number(req.query.author) || null;
-    const postsInfo = await store.paginate(author, postsPerPage, skip);
+    const query = req.query.query as string | undefined;
+    const skip = (page - 1) * postsPerPage;
+    const postsInfo = await store.filter(author, query, postsPerPage, skip);
     const postsCount = postsInfo.postsCount;
     const numberOfPages = Math.ceil(postsCount / postsPerPage);
     const next = page * postsPerPage < postsCount ? page + 1 : false;
@@ -172,6 +173,7 @@ const postRoutes = (app: Application) => {
     );
 
   app.get('/pagination', paginated);
+  app.get('/filter', filter);
 };
 
 export default postRoutes;
