@@ -1,12 +1,6 @@
+import { IPayload } from './../interface/payload';
 import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
-import { TUser } from './../model/user';
-
-interface IPayload {
-  user: TUser;
-  iat: number;
-  exp: number;
-}
 
 const verifyToken = (req: Request, res: Response, next: NextFunction) => {
   try {

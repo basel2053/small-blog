@@ -8,7 +8,7 @@ export const validateUserCreate = () => {
       .notEmpty()
       .isEmail()
       .custom(async (value: string) => {
-        const user = await User.showByEmail(value);
+        const user = await User.showByField(value, 'email');
         if (user) {
           return Promise.reject('E-mail already in use');
         }

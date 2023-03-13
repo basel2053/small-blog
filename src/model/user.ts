@@ -104,15 +104,27 @@ export class User {
   }
 
   // ? for validation purpose
-  static async showByEmail(email: string): Promise<TUser> {
+  static async showByField(value: string, field: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = 'SELECT email FROM users WHERE email=$1';
-      const result = await conn.query(sql, [email]);
+      const sql = `SELECT id,email FROM users WHERE ${field}=$1`;
+      const result = await conn.query(sql, [value]);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Cannot Find user ${email}, ${err}`);
+      throw new Error(`Cannot Find user ${value}, ${err}`);
+    }
+  }
+
+  // ? for removing the refresh token on logout
+  static async deleteRefreshToken(id: string): Promise<void> {
+    try {
+      const conn = await Client.connect();
+      const sql = `UPDATE users SET refreshToken=NULL WHERE id=$1`;
+      await conn.query(sql, [id]);
+      conn.release();
+    } catch (err) {
+      throw new Error(`Cannot Find user ${id}, ${err}`);
     }
   }
 
