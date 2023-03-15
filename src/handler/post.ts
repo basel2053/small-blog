@@ -54,6 +54,7 @@ const filter = async (req: Request, res: Response): Promise<void> => {
     const author = Number(req.query.author) || null;
     const query = req.query.query as string | undefined;
     const skip = (page - 1) * postsPerPage;
+
     const postsInfo = await store.filter(author, query, postsPerPage, skip);
     const postsCount = postsInfo.postsCount;
     const numberOfPages = Math.ceil(postsCount / postsPerPage);

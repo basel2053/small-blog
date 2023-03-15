@@ -15,7 +15,6 @@ export class Post {
       const sql = `SELECT * FROM posts ${
         author ? 'WHERE user_id=' + author : ''
       }`;
-      console.log(sql);
       const result = await conn.query(sql);
       conn.release();
       return result.rows;
@@ -125,20 +124,16 @@ export class Post {
     skip: number
   ): Promise<{ posts: TPost[]; postsCount: number }> {
     try {
-      const whereQuery = `${author || query ? 'WHERE' : ''}`;
-      const andQuery = `${author && query ? 'AND' : ''}`;
-      const authorQuery = `${author ? 'user_id=' + author : ''}`;
-      const searchQuery = `${query ? `LOWER(title) ILIKE '${query}%'` : ''}`;
-      const myUltimateQuery = `SELECT * FROM posts ${whereQuery} ${authorQuery} ${andQuery} ${searchQuery}`;
+      const whereQuery = `${author || query ? ' WHERE' : ''}`;
+      const andQuery = `${author && query ? ' AND' : ''}`;
+      const authorQuery = `${author ? ' user_id=' + author : ''}`;
+      const searchQuery = `${query ? ` title ILIKE '${query}%'` : ''}`;
+      const myUltimateQuery = `SELECT * FROM posts${whereQuery}${authorQuery}${andQuery}${searchQuery}`;
       // ! NOTE if it work properly try to add these variables as $(variables) in the conn.query instead of putting all of it in the string
-
       const conn = await Client.connect();
-      console.log(myUltimateQuery);
       const sql = myUltimateQuery;
       const result = await conn.query(sql);
-      console.log('query 1 can run');
       const sql2 = `${myUltimateQuery} LIMIT $1 OFFSET $2`;
-      console.log(sql2);
       const result2 = await conn.query(sql2, [limit, skip]);
       conn.release();
       return { posts: result2.rows, postsCount: result.rowCount };
