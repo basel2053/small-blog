@@ -101,7 +101,7 @@ const authenticate = async (
     if (!user) {
       return next(
         new APIError(
-          `cannot authenticate user ${email}`,
+          `Invalid email or password`,
           404,
           'failed to authenticate the user',
           true
@@ -150,7 +150,7 @@ const authenticate = async (
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.json({ message: 'user signed in', accessToken: token });
+    res.json({ user: user.name, accessToken: token });
   } catch (err) {
     throw new Error(`couldn't authenticate user, ${req.body.email} , ${err}`);
   }

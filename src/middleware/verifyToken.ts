@@ -13,7 +13,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     res.locals.userId = payload.user.id;
     next();
   } catch (err) {
-    res.status(400).json({ error: 'Token invalid or expired' });
+    res.status(403).json({ error: 'Token invalid or expired' });
   }
 };
 

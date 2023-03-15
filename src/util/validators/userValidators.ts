@@ -6,7 +6,7 @@ const store = new User();
 
 export const validateUserCreate = () => {
   return [
-    body('email', 'invalid email')
+    body('email', 'Please provide a valid email.')
       .notEmpty()
       .isEmail()
       .custom(async (value: string) => {
@@ -28,7 +28,7 @@ export const validateUserCreate = () => {
     body('name', 'invalid name')
       .optional()
       .isAlphanumeric()
-      .isLength({ min: 2, max: 40 }),
+      .isLength({ min: 1, max: 40 }),
   ];
 };
 
@@ -50,7 +50,7 @@ export const validateUserUpdate = () => {
 
 export const validateUserAuthenticate = () => {
   return [
-    body('email', 'invalid email').notEmpty().isEmail(),
+    body('email', 'Please provide a valid email.').notEmpty().isEmail(),
     body('password', 'Invalid password should be 6-16 characters')
       .isAlphanumeric()
       .isLength({ min: 6, max: 16 })

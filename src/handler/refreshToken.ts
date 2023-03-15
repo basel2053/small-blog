@@ -43,7 +43,7 @@ const refreshToken = async (
         JWT_REFRESH_SECRET as string,
         async (err: VerifyErrors | null, payload: any) => {
           if (err) return res.sendStatus(403);
-          // ? with the refresh token rotation here we know that invalid token (resuse attempt)
+          // ? with the refresh token rotation here we know that invalid token (resuse attempt), so we delete all user tokens
           await store.deleteRefreshToken(payload?.user.id);
         }
       );
