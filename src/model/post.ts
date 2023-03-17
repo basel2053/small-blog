@@ -4,6 +4,7 @@ export type TPost = {
   id?: number;
   title: string;
   description: string;
+  field: string;
   image: string;
   author: string;
 };
@@ -85,10 +86,11 @@ export class Post {
     try {
       const conn = await Client.connect();
       const sql =
-        'INSERT INTO posts(title,description,image,author) VALUES ($1,$2,$3,$4) RETURNING *';
+        'INSERT INTO posts(title,description,field,image,author) VALUES ($1,$2,$3,$4,$5) RETURNING *';
       const result = await conn.query(sql, [
         post.title,
         post.description,
+        post.field,
         post.image,
         post.author,
       ]);

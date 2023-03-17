@@ -80,8 +80,9 @@ const show = async (req: Request, res: Response): Promise<void> => {
 };
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = res.locals.userId;
-    const post = await store.create({ ...req.body, userId });
+    console.log(req.body);
+    const author = res.locals.username;
+    const post = await store.create({ ...req.body, author });
     res.json({ message: 'post created sucessfully', data: post });
   } catch (err) {
     throw new Error(`couldn't create post , ${err}`);
@@ -118,7 +119,7 @@ const update = async (
           .json({ warning: "Image wasn't deleted, path error", data: post });
       }
     }
-    res.json({ message: 'posts updated sucessfully', data: post });
+    res.json({ message: 'post updated sucessfully', data: post });
   } catch (err) {
     throw new Error(`couldn't updated post , ${err}`);
   }
@@ -129,7 +130,7 @@ const remove = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const post = await store.delete(req.params.postId, res.locals.userId);
+    const post = await store.delete(req.params.postId, res.locals.username);
     if (!post) {
       return next(
         new APIError(

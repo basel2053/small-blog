@@ -9,6 +9,18 @@ export const validatePostCreate = () => {
       .isString()
       .isLength({ min: 3, max: 40 }),
     body('description', 'Invalid description').notEmpty().isLength({ min: 16 }),
+    body('field', 'Invalid field').isIn([
+      'Web Programming',
+      'Embedded System',
+      'Cyber Security',
+      'Mobile Development',
+      'DevOps',
+      'Cloud Architect',
+      'Software Testing',
+      'Data Analytics & Visualization',
+      'UI/UX',
+      'System Admin',
+    ]),
   ];
 };
 
