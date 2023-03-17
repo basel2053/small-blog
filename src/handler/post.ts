@@ -97,7 +97,7 @@ const update = async (
     const post = await store.update(
       req.params.postId,
       req.body,
-      +res.locals.userId
+      res.locals.username
     );
     if (!post) {
       return next(
@@ -129,7 +129,7 @@ const remove = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const post = await store.delete(req.params.postId, +res.locals.userId);
+    const post = await store.delete(req.params.postId, res.locals.userId);
     if (!post) {
       return next(
         new APIError(

@@ -1,6 +1,6 @@
-import APIError from 'Error/ApiError';
+import APIError from '../Error/ApiError';
 import Client from '../database/client';
-import ErrorType from 'Error/error.type';
+import ErrorType from '../Error/error.type';
 
 export interface IAudit {
   auditAction: string;

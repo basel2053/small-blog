@@ -25,10 +25,9 @@ export const validateUserCreate = () => {
         }
         return true;
       }),
-    body('name', 'invalid name')
-      .optional()
+    body('name', 'Invalid username should be at least 2 characters')
       .isAlphanumeric()
-      .isLength({ min: 1, max: 40 }),
+      .isLength({ min: 2, max: 40 }),
   ];
 };
 

@@ -5,7 +5,7 @@ export type TPost = {
   title: string;
   description: string;
   image: string;
-  userId: number;
+  author: string;
 };
 
 export class Post {
@@ -13,7 +13,7 @@ export class Post {
     try {
       const conn = await Client.connect();
       const sql = `SELECT * FROM posts ${
-        author ? 'WHERE user_id=' + author : ''
+        author ? 'WHERE author=' + author : ''
       }`;
       const result = await conn.query(sql);
       conn.release();
@@ -35,12 +35,16 @@ export class Post {
     }
   }
 
-  async update(id: string, post: TPost, userId: number): Promise<TPost | null> {
+  async update(
+    id: string,
+    post: TPost,
+    username: string
+  ): Promise<TPost | null> {
     try {
       const conn = await Client.connect();
       const sql = 'SELECT user_id,image FROM posts WHERE id=$1';
       const result = await conn.query(sql, [id]);
-      if (!result.rows[0] || result.rows[0].user_id !== userId) {
+      if (!result.rows[0] || result.rows[0].author !== username) {
         conn.release();
         return null;
       }
@@ -59,12 +63,12 @@ export class Post {
     }
   }
 
-  async delete(id: string, userId: number): Promise<TPost | null> {
+  async delete(id: string, username: string): Promise<TPost | null> {
     try {
       const conn = await Client.connect();
-      const sql = 'SELECT user_id FROM posts WHERE id=$1';
+      const sql = 'SELECT author FROM posts WHERE id=$1';
       const result = await conn.query(sql, [id]);
-      if (!result.rows[0] || result.rows[0].user_id !== userId) {
+      if (!result.rows[0] || result.rows[0].author !== username) {
         conn.release();
         return null;
       }
@@ -81,12 +85,12 @@ export class Post {
     try {
       const conn = await Client.connect();
       const sql =
-        'INSERT INTO posts(title,description,image,user_id) VALUES ($1,$2,$3,$4) RETURNING *';
+        'INSERT INTO posts(title,description,image,author) VALUES ($1,$2,$3,$4) RETURNING *';
       const result = await conn.query(sql, [
         post.title,
         post.description,
         post.image,
-        post.userId,
+        post.author,
       ]);
       conn.release();
       return result.rows[0];
@@ -106,7 +110,7 @@ export class Post {
       const sql = 'SELECT id from posts';
       const result = await conn.query(sql);
       const sql2 = `SELECT * FROM posts ${
-        author ? 'WHERE user_id=' + author : ''
+        author ? 'WHERE author=' + author : ''
       } LIMIT $1 OFFSET $2`;
       const result2 = await conn.query(sql2, [limit, skip]);
       conn.release();
@@ -126,7 +130,7 @@ export class Post {
     try {
       const whereQuery = `${author || query ? ' WHERE' : ''}`;
       const andQuery = `${author && query ? ' AND' : ''}`;
-      const authorQuery = `${author ? ' user_id=' + author : ''}`;
+      const authorQuery = `${author ? ' author=' + author : ''}`;
       const searchQuery = `${query ? ` title ILIKE '${query}%'` : ''}`;
       const myUltimateQuery = `SELECT * FROM posts${whereQuery}${authorQuery}${andQuery}${searchQuery}`;
       // ! NOTE if it work properly try to add these variables as $(variables) in the conn.query instead of putting all of it in the string

@@ -108,14 +108,14 @@ const authenticate = async (
         )
       );
     }
-    const { id } = user;
+    const { id, name } = user;
     const token = signToken(
-      { id, email },
+      { id, name },
       JWT_SECRET + '',
       JWT_ACCESS_EXPIRY + ''
     );
     const refreshToken = signToken(
-      { id, email },
+      { id, name },
       JWT_REFRESH_SECRET + '',
       JWT_REFRESH_EXPIRY + ''
     );

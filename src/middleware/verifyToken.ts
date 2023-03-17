@@ -9,8 +9,8 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     }
     const token = req.headers.authorization?.split(' ')[1] as string;
     const payload = verify(token, process.env.JWT_SECRET as string) as IPayload;
-
     res.locals.userId = payload.user.id;
+    res.locals.username = payload.user.name;
     next();
   } catch (err) {
     res.status(403).json({ error: 'Token invalid or expired' });
