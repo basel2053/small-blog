@@ -86,13 +86,14 @@ export class Post {
     try {
       const conn = await Client.connect();
       const sql =
-        'INSERT INTO posts(title,description,field,image,author) VALUES ($1,$2,$3,$4,$5) RETURNING *';
+        'INSERT INTO posts(title,description,field,image,author,readTime) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *';
       const result = await conn.query(sql, [
         post.title,
         post.description,
         post.field,
         post.image,
         post.author,
+        Math.ceil(post.description.split(' ').length / 100),
       ]);
       conn.release();
       return result.rows[0];
@@ -103,7 +104,7 @@ export class Post {
 
   // ? pagination
   async paginate(
-    author: number | null,
+    author: string | null,
     limit: number,
     skip: number
   ): Promise<{ posts: TPost[]; postsCount: number }> {
@@ -124,7 +125,7 @@ export class Post {
 
   // ? for filteration, search, and pagination
   async filter(
-    author: number | null,
+    author: string | null,
     query: string | undefined,
     limit: number,
     skip: number
