@@ -1,0 +1,20 @@
+version: 2.1
+orbs:
+  node: circleci/node@5.1.0
+jobs:
+  build:
+    docker:
+      - image: "cimg/base:stable"
+    steps:
+    - node/install
+    - checkout
+    -run:
+      name: greeting
+      command: |
+        echo "Hello World"
+    -run:
+      name: testing api
+      commands: |
+      npm run test
+
+# NOTE  HERE  later we can add a deployment step

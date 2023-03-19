@@ -1,0 +1,76 @@
+version: 2.1
+orbs:
+  # orgs contain basc recipes and reproducible actions (install node, aws, etc.)
+  node: circleci/node@5.0.2
+  eb: circleci/aws-elastic-beanstalk@2.0.1
+  aws-cli: circleci/aws-cli@3.1.1
+  # different jobs are calles later in the workflows sections
+jobs:
+  build:
+    docker:
+      # the base image can run most needed actions with orbs
+      - image: 'cimg/node:14.15'
+    steps:
+      # install node and checkout code
+      - node/install:
+          node-version: '14.15'
+      - checkout
+      # Use root level package.json to install dependencies in the frontend app
+      - run:
+          name: Install Front-End Dependencies
+          command: |
+            echo "NODE --version" 
+            echo $(node --version)
+            echo "NPM --version" 
+            echo $(npm --version)
+            npm run frontend:install
+      # TODO: Install dependencies in the the backend API
+      - run:
+          name: Install API Dependencies
+          command: |
+            echo "TODO: Install dependencies in the the backend API  "
+            npm run api:install
+      # TODO: Build the frontend app
+      - run:
+          name: Front-End Build
+          command: |
+            echo "TODO: Build the frontend app"
+            npm run frontend:build
+      # TODO: Build the backend API
+      - run:
+          name: API Build
+          command: |
+            echo "TODO: Build the backend API"
+            npm run api:build
+  # deploy step will run only after manual approval
+  deploy:
+    docker:
+      - image: 'cimg/base:stable'
+      # More setup needed for aws, node, elastic beanstalk
+    steps:
+      - node/install:
+          node-version: '14.15'
+      - eb/setup
+      - aws-cli/setup
+      - checkout
+      - run:
+          name: Deploy App
+          # TODO: Install, build, deploy in both apps
+          command: |
+            echo "# TODO: Install, build, deploy in both apps"
+            npm run deploy
+workflows:
+  udagram:
+    jobs:
+      - build
+      - hold:
+          filters:
+            branches:
+              only:
+                - main
+          type: approval
+          requires:
+            - build
+      - deploy:
+          requires:
+            - hold
