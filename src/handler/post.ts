@@ -32,7 +32,7 @@ const paginated = async (req: Request, res: Response): Promise<void> => {
   try {
     const page = Number(req.query.page) || 1;
     const skip = (page - 1) * postsPerPage;
-    const author = Number(req.query.author) || null;
+    const author = req.query.author + '' || null;
     const postsInfo = await store.paginate(author, postsPerPage, skip);
     const postsCount = postsInfo.postsCount;
     const numberOfPages = Math.ceil(postsCount / postsPerPage);
@@ -51,7 +51,7 @@ const paginated = async (req: Request, res: Response): Promise<void> => {
 const filter = async (req: Request, res: Response): Promise<void> => {
   try {
     const page = Number(req.query.page) || 1;
-    const author = Number(req.query.author) || null;
+    const author = req.query.author + '' || null;
     const query = req.query.query as string | undefined;
     const skip = (page - 1) * postsPerPage;
 
@@ -73,14 +73,13 @@ const filter = async (req: Request, res: Response): Promise<void> => {
 const show = async (req: Request, res: Response): Promise<void> => {
   try {
     const post = await store.show(req.params.postId);
-    res.json({ message: 'retrived posts sucessfully', data: post });
+    res.json({ message: 'retrived post sucessfully', data: post });
   } catch (err) {
     res.sendStatus(404);
   }
 };
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log(req.body);
     const author = res.locals.username;
     const post = await store.create({ ...req.body, author });
     res.json({ message: 'post created sucessfully', data: post });

@@ -110,12 +110,12 @@ const authenticate = async (
     }
     const { id, name } = user;
     const token = signToken(
-      { id, name },
+      { id, name, email },
       JWT_SECRET + '',
       JWT_ACCESS_EXPIRY + ''
     );
     const refreshToken = signToken(
-      { id, name },
+      { id, name, email },
       JWT_REFRESH_SECRET + '',
       JWT_REFRESH_EXPIRY + ''
     );

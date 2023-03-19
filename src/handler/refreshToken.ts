@@ -56,7 +56,6 @@ const refreshToken = async (
         )
       );
     }
-
     const newRefreshTokens = user.refreshtoken?.filter(
       (rt) => rt !== jwtRefresh
     ) as Array<string>;
