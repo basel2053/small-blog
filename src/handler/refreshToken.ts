@@ -92,8 +92,12 @@ const refreshToken = async (
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
         });
-
-        res.json({ message: 'user token refreshed', accessToken });
+        console.log(user.name);
+        res.json({
+          message: 'user token refreshed',
+          name: user.name,
+          accessToken,
+        });
       }
     );
   } catch (err) {

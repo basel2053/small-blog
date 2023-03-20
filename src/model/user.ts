@@ -1,6 +1,7 @@
 import Client from '../database/client';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import { TPost } from './post';
 
 dotenv.config();
 const { PEPPER, SR } = process.env;
@@ -13,6 +14,9 @@ export type TUser = {
   refreshtoken?: string[];
 };
 
+interface IUserPosts extends TPost {
+  name: string;
+}
 export class User {
   async index(): Promise<TUser[]> {
     try {
@@ -26,14 +30,15 @@ export class User {
     }
   }
 
-  async show(author: string): Promise<TUser> {
+  async show(author: string): Promise<IUserPosts[]> {
     try {
       const conn = await Client.connect();
       // IMPORTANT  remember later to get the avatar of the user
-      const sql = 'SELECT email,name FROM users WHERE name=$1';
+      const sql =
+        'SELECT name,p.* FROM users INNER JOIN posts p ON name=p.author WHERE name=$1 ORDER BY p.id DESC LIMIT 6';
       const result = await conn.query(sql, [author]);
       conn.release();
-      return result.rows[0];
+      return result.rows;
     } catch (err) {
       throw new Error(`Cannot get user ${author}, ${err}`);
     }
@@ -121,7 +126,7 @@ export class User {
   async showByToken(value: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = `SELECT id,email,refreshToken FROM users WHERE $1=ANY(refreshToken)`;
+      const sql = `SELECT * FROM users WHERE $1=ANY(refreshToken)`;
       const result = await conn.query(sql, [value]);
       conn.release();
       return result.rows[0];

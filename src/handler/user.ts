@@ -35,7 +35,7 @@ const index = async (_req: Request, res: Response): Promise<void> => {
 const show = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await store.show(req.params.author);
-    res.json({ message: 'retrived the user ', data: user });
+    res.json({ message: 'retrived the user ', author: user });
   } catch (err) {
     throw new Error(`couldn't find user,${req.params.id} , ${err}`);
   }
@@ -150,7 +150,7 @@ const authenticate = async (
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.json({ user: user.name, accessToken: token });
+    res.json({ name: user.name, accessToken: token });
   } catch (err) {
     throw new Error(`couldn't authenticate user, ${req.body.email} , ${err}`);
   }

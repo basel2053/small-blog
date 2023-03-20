@@ -114,7 +114,7 @@ export class Post {
       const whereQuery = `${author || query ? ' WHERE' : ''}`;
       const andQuery = `${author && query ? ' AND' : ''}`;
       const authorQuery = `${author ? ' author=' + author : ''}`;
-      const searchQuery = `${query ? ` title ILIKE '${query}%'` : ''}`;
+      const searchQuery = `${query ? ` title ILIKE '%${query}%'` : ''}`;
       const myUltimateQuery = `SELECT * FROM posts${whereQuery}${authorQuery}${andQuery}${searchQuery}`;
       // ! NOTE if it work properly try to add these variables as $(variables) in the conn.query instead of putting all of it in the string
       const conn = await Client.connect();
