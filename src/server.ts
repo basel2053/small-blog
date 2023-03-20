@@ -30,7 +30,7 @@ app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
 app.use(morgan('dev'));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
-app.use('/images', express.static('uploads'));
+app.use('/uploads', express.static('uploads'));
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 userRoutes(app);

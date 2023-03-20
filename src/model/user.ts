@@ -26,15 +26,16 @@ export class User {
     }
   }
 
-  async show(id: string): Promise<TUser> {
+  async show(author: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = 'SELECT email,name FROM users WHERE id=$1';
-      const result = await conn.query(sql, [id]);
+      // IMPORTANT  remember later to get the avatar of the user
+      const sql = 'SELECT email,name FROM users WHERE name=$1';
+      const result = await conn.query(sql, [author]);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Cannot get user ${id}, ${err}`);
+      throw new Error(`Cannot get user ${author}, ${err}`);
     }
   }
 

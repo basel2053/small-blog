@@ -87,6 +87,7 @@ export class Post {
       const conn = await Client.connect();
       const sql =
         'INSERT INTO posts(title,description,field,image,author,readTime) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *';
+      console.log(sql);
       const result = await conn.query(sql, [
         post.title,
         post.description,
@@ -102,30 +103,9 @@ export class Post {
     }
   }
 
-  // ? pagination
-  async paginate(
-    author: string | null,
-    limit: number,
-    skip: number
-  ): Promise<{ posts: TPost[]; postsCount: number }> {
-    try {
-      const conn = await Client.connect();
-      const sql = 'SELECT id from posts';
-      const result = await conn.query(sql);
-      const sql2 = `SELECT * FROM posts ${
-        author ? 'WHERE author=' + author : ''
-      } LIMIT $1 OFFSET $2`;
-      const result2 = await conn.query(sql2, [limit, skip]);
-      conn.release();
-      return { posts: result2.rows, postsCount: result.rowCount };
-    } catch (err) {
-      throw new Error(`Cannot get posts ${err}`);
-    }
-  }
-
   // ? for filteration, search, and pagination
   async filter(
-    author: string | null,
+    author: string | undefined,
     query: string | undefined,
     limit: number,
     skip: number

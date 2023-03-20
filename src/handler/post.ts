@@ -16,7 +16,7 @@ import {
 
 const store = new Post();
 
-const postsPerPage = 12;
+const postsPerPage = 6;
 
 const index = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -28,41 +28,20 @@ const index = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const paginated = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const page = Number(req.query.page) || 1;
-    const skip = (page - 1) * postsPerPage;
-    const author = req.query.author + '' || null;
-    const postsInfo = await store.paginate(author, postsPerPage, skip);
-    const postsCount = postsInfo.postsCount;
-    const numberOfPages = Math.ceil(postsCount / postsPerPage);
-    const next = page * postsPerPage < postsCount ? page + 1 : false;
-    const prev = page > 1 ? page - 1 : false;
-    res.json({
-      message: 'retrived posts sucessfully',
-      data: postsInfo.posts,
-      pagination: { postsCount, numberOfPages, page, next, prev },
-    });
-  } catch (err) {
-    throw new Error(`couldn't get posts, ${err}`);
-  }
-};
-
 const filter = async (req: Request, res: Response): Promise<void> => {
   try {
     const page = Number(req.query.page) || 1;
-    const author = req.query.author + '' || null;
-    const query = req.query.query as string | undefined;
+    const author = req.query.author as string | undefined;
+    const query = (req.query.query as string) || '';
     const skip = (page - 1) * postsPerPage;
-
     const postsInfo = await store.filter(author, query, postsPerPage, skip);
     const postsCount = postsInfo.postsCount;
     const numberOfPages = Math.ceil(postsCount / postsPerPage);
-    const next = page * postsPerPage < postsCount ? page + 1 : false;
-    const prev = page > 1 ? page - 1 : false;
-    res.json({
+    const next = page * postsPerPage < postsCount ? true : false;
+    const prev = page > 1 ? true : false;
+    res.status(200).json({
       message: 'retrived posts sucessfully',
-      data: postsInfo.posts,
+      posts: postsInfo.posts,
       pagination: { postsCount, numberOfPages, page, next, prev },
     });
   } catch (err) {
@@ -73,7 +52,7 @@ const filter = async (req: Request, res: Response): Promise<void> => {
 const show = async (req: Request, res: Response): Promise<void> => {
   try {
     const post = await store.show(req.params.postId);
-    res.json({ message: 'retrived post sucessfully', data: post });
+    res.json({ message: 'retrived post sucessfully', post });
   } catch (err) {
     res.sendStatus(404);
   }
@@ -173,7 +152,6 @@ const postRoutes = (app: Application) => {
       update
     );
 
-  app.get('/pagination', paginated);
   app.get('/filter', filter);
 };
 

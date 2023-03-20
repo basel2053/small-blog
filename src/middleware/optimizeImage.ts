@@ -10,11 +10,9 @@ const optimizeImage = async (
   if (!req.file && req.method === 'PATCH') {
     return next();
   }
-  const path = `uploads/${uuidv4()} - ${req.file?.originalname}.${
-    req.file?.mimetype.split('/')[1]
-  }`;
+  const path = `uploads/${uuidv4()} - ${req.file?.originalname}`;
   try {
-    await sharp(req.file?.buffer).resize(600, 600).toFile(path);
+    await sharp(req.file?.buffer).resize(600, 400).toFile(path);
     // NOTE  may optimize quality or extension later
     req.body.image = path;
     next();

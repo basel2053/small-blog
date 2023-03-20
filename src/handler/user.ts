@@ -34,7 +34,7 @@ const index = async (_req: Request, res: Response): Promise<void> => {
 
 const show = async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = await store.show(req.params.id);
+    const user = await store.show(req.params.author);
     res.json({ message: 'retrived the user ', data: user });
   } catch (err) {
     throw new Error(`couldn't find user,${req.params.id} , ${err}`);
@@ -162,7 +162,7 @@ const userRoutes = (app: Application): void => {
   app.delete('/users/:id', remove);
   app.patch('/users/:id', validateUserUpdate(), validation, update);
   // HERE  . our used routes
-  app.get('/users/:id', verifyToken, show);
+  app.get('/users/:author', verifyToken, show);
   app.post('/users/signup', validateUserCreate(), validation, create);
   app.post(
     '/users/login',
