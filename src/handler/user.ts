@@ -1,4 +1,5 @@
 import { Application, Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 import { User } from '../model/user';
 import signToken from '../util/signToken';
 import validation from '../middleware/validation';
@@ -11,16 +12,22 @@ import {
   validateUserUpdate,
   validateUserCreate,
   validateUserAuthenticate,
+  validateUserForgetPassword,
 } from '../util/validators/userValidators';
+import { compare, hash } from 'bcrypt';
+import mail from '../util/mailing';
+import { Token } from '../model/token';
 dotenv.config();
 
 const store = new User();
+const reset = new Token();
 
 const {
   JWT_SECRET,
   JWT_ACCESS_EXPIRY,
   JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRY,
+  SR,
 } = process.env;
 
 const index = async (_req: Request, res: Response): Promise<void> => {
@@ -159,6 +166,130 @@ const authenticate = async (
   }
 };
 
+const forgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const user = await store.validate(req.body.email);
+    if (!user) {
+      return next(
+        new APIError(
+          `User doesn't exist..`,
+          404,
+          'failed to authenticate the user',
+          true
+        )
+      );
+    }
+    // ! important when user succesfully reset his password delete all of his refreshTokens
+    const resetCode = Math.floor(100000 + Math.random() * 900000) + ''; // NOTE  ensuring first digit will never be 0
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const hashedToken = await hash(resetToken, Number(SR));
+    const hashedCode = crypto
+      .createHash('sha512')
+      .update(resetCode)
+      .digest('hex');
+    await reset.createToken(hashedToken, hashedCode, user.id);
+    // NOTE saved hashs will be later compared to see if we really got valid request or not, resetToken valid for 15min, check if verified
+    const link = `http://localhost:5173/forgot?token=${resetToken}&id=${user.id}`;
+    mail(user.email, 'Password Reset Request', link, user.name);
+    res.status(200).send({ message: 'An E-mail has been sent.' });
+  } catch (err) {
+    // NOTE we may delete all info we saved if an error happened
+    console.log(err);
+  }
+};
+
+const checkResetCode = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { token, id } = req.params;
+    const storedToken = await reset.getToken(id);
+
+    if (!storedToken) {
+      return next(
+        new APIError(
+          `Invalid or expired password reset token`,
+          404,
+          'failed to authenticate the user',
+          true
+        )
+      );
+    }
+
+    if (
+      !(await compare(token, storedToken.token)) ||
+      crypto.createHash('sha512').update(req.body.code).digest('hex') !==
+        storedToken.code
+    ) {
+      return next(
+        new APIError(
+          `Invalid or expired password reset token`,
+          404,
+          'failed to authenticate the user',
+          true
+        )
+      );
+    }
+
+    await reset.verifiedCode(id);
+    res.status(200).send({
+      message:
+        'The reset code has been verified you are ready to change the password',
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+    // HERE  verifying that the user indeed exists
+    // const user = await store.getById(id);
+    // if (!user) {
+    //   return next(
+    //     new APIError(
+    //       `Cannot find the user with Id: ${id}`,
+    //       404,
+    //       'failed to get the user',
+    //       true
+    //     )
+    //   );
+    // }
+
+    const storedToken = await reset.getToken(id);
+    if (!storedToken?.verified) {
+      return next(
+        new APIError(
+          `Password reset code is not verified you are not allowed to change password.`,
+          403,
+          'Not verified reset token',
+          true
+        )
+      );
+    }
+    await store.update(id, password);
+    await reset.removeToken(id);
+
+    res
+      .status(200)
+      .send({ message: 'You changed your password successfully.' });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const userRoutes = (app: Application): void => {
   // ! Development purpose only
   app.get('/users', index);
@@ -173,6 +304,13 @@ const userRoutes = (app: Application): void => {
     validation,
     authenticate
   );
+  app.post(
+    '/users/forgot-password',
+    validateUserForgetPassword(),
+    forgotPassword
+  );
+  app.post('/users/check-reset', checkResetCode);
+  app.post('/user/reset-password', resetPassword);
 };
 
 export default userRoutes;

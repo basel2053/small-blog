@@ -44,6 +44,18 @@ export class User {
     }
   }
 
+  async getById(id: string): Promise<TUser> {
+    try {
+      const conn = await Client.connect();
+      const sql = 'SELECT * FROM users WHERE id=$1';
+      const result = await conn.query(sql, [id]);
+      conn.release();
+      return result.rows[0];
+    } catch (err) {
+      throw new Error(`Cannot get user ${id}, ${err}`);
+    }
+  }
+
   async update(id: string, password: string): Promise<TUser | undefined> {
     try {
       const conn = await Client.connect();
@@ -110,11 +122,13 @@ export class User {
   }
 
   // ? for validation purpose
-  async validate(email: string, name: string): Promise<TUser> {
+  async validate(email: string, name?: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = `SELECT name,email FROM users WHERE email=$1 OR name=$2`;
-      const result = await conn.query(sql, [email, name]);
+      const sql = `SELECT id,name,email FROM users WHERE email=$1 ${
+        name ? `OR name='${name + ''}'` : ''
+      }`;
+      const result = await conn.query(sql, [email]);
       conn.release();
       return result.rows[0];
     } catch (err) {

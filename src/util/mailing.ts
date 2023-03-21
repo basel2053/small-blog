@@ -2,15 +2,13 @@ import { createTransport } from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const { MAILING_USER, MAILING_PW, MAILING_HOST } = process.env;
+const { MAILING_USER, MAILING_PW, FROM_EMAIL } = process.env;
 
 // NOTE  remember to pass options to the function for email and content
-const mail = () => {
+const mail = (email: string, subject: string, link: string, name?: string) => {
   // HERE  create SMTP service to be able to send mails
   const transporter = createTransport({
-    host: MAILING_HOST,
-    port: 2525,
-    secure: true,
+    service: 'hotmail',
     auth: {
       user: MAILING_USER,
       pass: MAILING_PW,
@@ -18,32 +16,29 @@ const mail = () => {
   });
 
   const message = {
-    from: 'basselsalah2053@gmail.com',
-    to: 'baselsalah2053@gmail.com',
-    subject: 'AMP4EMAIL message',
+    from: `Beanzo <${FROM_EMAIL}>`,
+    to: email,
+    subject: subject,
     text: 'For clients with plaintext support only',
-    html: '<p>For clients that do not support AMP4EMAIL or amp content is not valid</p>',
-    amp: `<!doctype html>
+    html: `<!doctype html>
     <html ⚡4email>
       <head>
         <meta charset="utf-8">
-        <style amp4email-boilerplate>body{visibility:hidden}</style>
-        <script async src="https://cdn.ampproject.org/v0.js"></script>
-        <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
       </head>
       <body>
-        <p>Image: <amp-img src="https://cldup.com/P0b1bUmEet.png" width="16" height="16"/></p>
-        <p>GIF (requires "amp-anim" script in header):<br/>
-          <amp-anim src="https://cldup.com/D72zpdwI-i.gif" width="500" height="350"/></p>
+        <p>Hi ${name},</p>
+        <p>You requested to reset your password.</p>
+        <p> Please, click the link below to reset your password</p>
+          <a href="${link}">Reset Password</a>
       </body>
     </html>`,
   };
 
-  transporter.sendMail(message, function (err, info) {
+  transporter.sendMail(message, function (err) {
     if (err) {
       console.log(err);
     } else {
-      console.log(info);
+      console.log('mail sent');
     }
   });
 };

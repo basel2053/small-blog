@@ -59,7 +59,6 @@ const show = async (req: Request, res: Response): Promise<void> => {
 };
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log(req.body);
     const author = res.locals.username;
     const post = await store.create({ ...req.body, author });
     res.json({ message: 'post created sucessfully', data: post });
@@ -153,7 +152,7 @@ const postRoutes = (app: Application) => {
       update
     );
 
-  app.get('/filter', filter);
+  app.get('/filter', verifyToken, filter);
 };
 
 export default postRoutes;

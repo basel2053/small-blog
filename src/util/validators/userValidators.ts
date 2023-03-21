@@ -59,3 +59,7 @@ export const validateUserAuthenticate = () => {
       .notEmpty(),
   ];
 };
+
+export const validateUserForgetPassword = () => {
+  return [body('email', 'Please provide a valid email.').notEmpty().isEmail()];
+};

@@ -88,7 +88,6 @@ export class Post {
       const conn = await Client.connect();
       const sql =
         'INSERT INTO posts(title,description,field,image,author,readTime) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *';
-      console.log(sql);
       const result = await conn.query(sql, [
         post.title,
         post.description,
@@ -114,7 +113,7 @@ export class Post {
     try {
       const whereQuery = `${author || query ? ' WHERE' : ''}`;
       const andQuery = `${author && query ? ' AND' : ''}`;
-      const authorQuery = `${author ? ' author=' + author : ''}`;
+      const authorQuery = `${author ? ' author=' + `'${author}'` : ''}`;
       const searchQuery = `${query ? ` title ILIKE '%${query}%'` : ''}`;
       const myUltimateQuery = `SELECT * FROM posts${whereQuery}${authorQuery}${andQuery}${searchQuery}`;
       // ! NOTE if it work properly try to add these variables as $(variables) in the conn.query instead of putting all of it in the string
