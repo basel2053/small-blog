@@ -35,7 +35,10 @@ const index = async (_req: Request, res: Response): Promise<void> => {
 const show = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await store.show(req.params.author);
-    res.json({ message: 'retrived the user ', author: user });
+    res.json({
+      message: 'retrived the user ',
+      author: user,
+    });
   } catch (err) {
     throw new Error(`couldn't find user,${req.params.id} , ${err}`);
   }

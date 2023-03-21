@@ -4,16 +4,19 @@ import { User } from '../../model/user';
 
 const store = new User();
 
+// email or name
+
 export const validateUserCreate = () => {
   return [
     body('email', 'Please provide a valid email.')
       .notEmpty()
       .isEmail()
-      .custom(async (value: string) => {
-        const user = await store.showByEmail(value);
+      .custom(async (value: string, { req }) => {
+        const user = await store.validate(value, req.body.name);
         if (user) {
-          return Promise.reject('E-mail already in use');
+          return Promise.reject('E-mail and Username must be unique.');
         }
+        // NOTE  to check whether the email is invalid or name ---> we can check if (value === user.email) or (req.body.name === user.name)
       }),
     body('password', 'Invalid password should be 6-16 characters')
       .isAlphanumeric()

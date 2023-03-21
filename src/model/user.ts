@@ -110,15 +110,15 @@ export class User {
   }
 
   // ? for validation purpose
-  async showByEmail(value: string): Promise<TUser> {
+  async validate(email: string, name: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = `SELECT id,email FROM users WHERE email=$1`;
-      const result = await conn.query(sql, [value]);
+      const sql = `SELECT name,email FROM users WHERE email=$1 OR name=$2`;
+      const result = await conn.query(sql, [email, name]);
       conn.release();
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Cannot Find user ${value}, ${err}`);
+      throw new Error(`Cannot Find user ${email}, ${err}`);
     }
   }
 
