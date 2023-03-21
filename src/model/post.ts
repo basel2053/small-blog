@@ -40,25 +40,26 @@ export class Post {
     id: string,
     post: TPost,
     username: string
-  ): Promise<TPost | null> {
+  ): Promise<{ post: TPost; image: string } | null> {
     try {
       const conn = await Client.connect();
-      const sql = 'SELECT user_id,image FROM posts WHERE id=$1';
+      const sql = 'SELECT author,image FROM posts WHERE id=$1';
       const result = await conn.query(sql, [id]);
       if (!result.rows[0] || result.rows[0].author !== username) {
         conn.release();
         return null;
       }
       const sql2 =
-        'UPDATE posts SET title=$1,description=$2,image=$3 WHERE id=$4 RETURNING *';
+        'UPDATE posts SET title=$1,description=$2,image=$3, field=$4 WHERE id=$5 RETURNING *';
       const result2 = await conn.query(sql2, [
         post.title,
         post.description,
         post.image ? post.image : result.rows[0].image,
+        post.field,
         id,
       ]);
       conn.release();
-      return result2.rows[0];
+      return { post: result2.rows[0], image: result.rows[0].image };
     } catch (err) {
       throw new Error(`Cannot update post ${id}, ${err}`);
     }

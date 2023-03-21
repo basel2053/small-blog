@@ -7,7 +7,7 @@ export const validatePostCreate = () => {
     body('title', 'Invalid title')
       .notEmpty()
       .isString()
-      .isLength({ min: 3, max: 40 }),
+      .isLength({ min: 3, max: 50 }),
     body('description', 'Invalid description').notEmpty().isLength({ min: 16 }),
     body('field', 'Invalid field').isIn([
       'Web Programming',

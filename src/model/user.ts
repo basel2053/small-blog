@@ -33,7 +33,7 @@ export class User {
   async show(author: string): Promise<IUserPosts[]> {
     try {
       const conn = await Client.connect();
-      // IMPORTANT  remember later to get the avatar of the user
+      // IMPORTANT  remember later to get the avatar of the user, and NOTE name already exists in the posts author field
       const sql =
         'SELECT name,p.* FROM users INNER JOIN posts p ON name=p.author WHERE name=$1 ORDER BY p.id DESC LIMIT 6';
       const result = await conn.query(sql, [author]);

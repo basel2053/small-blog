@@ -18,15 +18,7 @@ const app: express.Application = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', '*');
-//   res.header('Access-Control-Allow-Credentials', true as any);
-//   res.header(
-//     'Access-Control-Allow-Headers',
-//     'Origin, X-Requested-With, Content-Type, Accept'
-//   );
-//   next();
-// });
+
 app.use(morgan('dev'));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());

@@ -7,6 +7,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     if (!req.headers.authorization) {
       return res.status(403).json({ error: 'No token was provided' });
     }
+
     const token = req.headers.authorization?.split(' ')[1] as string;
     const payload = verify(token, process.env.JWT_SECRET as string) as IPayload;
     res.locals.userId = payload.user.id;
