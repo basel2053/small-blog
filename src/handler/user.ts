@@ -339,7 +339,7 @@ const confirmEmail = async (
     await store.confirmUser(id + '');
     res.status(302).redirect('http://localhost:5173/login?confirmed=true');
   } catch (err) {
-    console.log(err);
+    res.sendStatus(403);
   }
 };
 

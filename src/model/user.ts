@@ -138,7 +138,7 @@ export class User {
   async validate(email: string, name?: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
-      const sql = `SELECT id,name,email FROM users WHERE email=$1 ${
+      const sql = `SELECT id,name,email,refreshtoken FROM users WHERE email=$1 ${
         name ? `OR name='${name + ''}'` : ''
       }`;
       const result = await conn.query(sql, [email]);
@@ -182,6 +182,19 @@ export class User {
       conn.release();
     } catch (err) {
       throw new Error(`Couldn't insert user ${email} refresh token, ${err}`);
+    }
+  }
+
+  async googleAuthRegister(email: string, name: string): Promise<TUser> {
+    try {
+      const conn = await Client.connect();
+      const sql =
+        'INSERT INTO users(email,name,confirmed) VALUES ($1,$2,TRUE) RETURNING email,name,id';
+      const result = await conn.query(sql, [email, name]);
+      conn.release();
+      return result.rows[0];
+    } catch (err) {
+      throw new Error(`Cannot create user ${name} , ${err}`);
     }
   }
 }

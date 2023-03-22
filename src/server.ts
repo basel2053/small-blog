@@ -10,6 +10,7 @@ import userRoutes from './handler/user';
 import postRoutes from './handler/post';
 import APIError from './Error/ApiError';
 import refreshTokenRoute from './handler/refreshToken';
+import oauth2Routes from './handler/oauth2';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 userRoutes(app);
 postRoutes(app);
 refreshTokenRoute(app);
+oauth2Routes(app);
 
 app.all('*', (req, res, next) => {
   next(
