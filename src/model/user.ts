@@ -59,9 +59,10 @@ export class User {
   async update(id: string, password: string): Promise<TUser | undefined> {
     try {
       const conn = await Client.connect();
-      const sql = 'UPDATE users SET password=$1 WHERE id=$2 RETURNING *';
+      const sql =
+        'UPDATE users SET password=$1,refreshtoken=$2 WHERE id=$3 RETURNING *';
       const hashedPassword = await bcrypt.hash(password + PEPPER, Number(SR));
-      const result = await conn.query(sql, [hashedPassword, id]);
+      const result = await conn.query(sql, [hashedPassword, [], id]);
       conn.release();
       return result.rows[0];
     } catch (err) {

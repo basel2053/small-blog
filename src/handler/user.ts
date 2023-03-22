@@ -13,6 +13,8 @@ import {
   validateUserCreate,
   validateUserAuthenticate,
   validateUserForgetPassword,
+  validateUserCheckReset,
+  validateUserResetPassword,
 } from '../util/validators/userValidators';
 import { compare, hash } from 'bcrypt';
 import mail from '../util/mailing';
@@ -183,7 +185,6 @@ const forgotPassword = async (
         )
       );
     }
-    // ! important when user succesfully reset his password delete all of his refreshTokens
     const resetCode = Math.floor(100000 + Math.random() * 900000) + ''; // NOTE  ensuring first digit will never be 0
     const resetToken = crypto.randomBytes(20).toString('hex');
     const hashedToken = await hash(resetToken, Number(SR));
@@ -191,10 +192,14 @@ const forgotPassword = async (
       .createHash('sha512')
       .update(resetCode)
       .digest('hex');
+
+    // !  HERE  we can instead of removing all previous reset Tokens, ordering tokens and get last one (DESC) and once user reset password we delete all he created before
+
+    await reset.removeToken(user.id + '');
     await reset.createToken(hashedToken, hashedCode, user.id);
     // NOTE saved hashs will be later compared to see if we really got valid request or not, resetToken valid for 15min, check if verified
-    const link = `http://localhost:5173/forgot?token=${resetToken}&id=${user.id}`;
-    mail(user.email, 'Password Reset Request', link, user.name);
+    const link = `http://localhost:5173/reset?token=${resetToken}&id=${user.id}`;
+    mail(user.email, 'Password Reset Request', link, resetCode, user.name);
     res.status(200).send({ message: 'An E-mail has been sent.' });
   } catch (err) {
     // NOTE we may delete all info we saved if an error happened
@@ -208,9 +213,8 @@ const checkResetCode = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { token, id } = req.params;
-    const storedToken = await reset.getToken(id);
-
+    const { token, id } = req.query;
+    const storedToken = await reset.getToken(id + '');
     if (!storedToken) {
       return next(
         new APIError(
@@ -221,15 +225,14 @@ const checkResetCode = async (
         )
       );
     }
-
     if (
-      !(await compare(token, storedToken.token)) ||
+      !(await compare(token + '', storedToken.token)) ||
       crypto.createHash('sha512').update(req.body.code).digest('hex') !==
         storedToken.code
     ) {
       return next(
         new APIError(
-          `Invalid or expired password reset token`,
+          `Expired password reset token or wrong code`,
           404,
           'failed to authenticate the user',
           true
@@ -237,7 +240,7 @@ const checkResetCode = async (
       );
     }
 
-    await reset.verifiedCode(id);
+    await reset.verifiedCode(id + '');
     res.status(200).send({
       message:
         'The reset code has been verified you are ready to change the password',
@@ -253,7 +256,7 @@ const resetPassword = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.query;
     const { password } = req.body;
     // HERE  verifying that the user indeed exists
     // const user = await store.getById(id);
@@ -267,8 +270,7 @@ const resetPassword = async (
     //     )
     //   );
     // }
-
-    const storedToken = await reset.getToken(id);
+    const storedToken = await reset.getToken(id + '');
     if (!storedToken?.verified) {
       return next(
         new APIError(
@@ -279,8 +281,8 @@ const resetPassword = async (
         )
       );
     }
-    await store.update(id, password);
-    await reset.removeToken(id);
+    await store.update(id + '', password);
+    await reset.removeToken(id + '');
 
     res
       .status(200)
@@ -309,8 +311,8 @@ const userRoutes = (app: Application): void => {
     validateUserForgetPassword(),
     forgotPassword
   );
-  app.post('/users/check-reset', checkResetCode);
-  app.post('/user/reset-password', resetPassword);
+  app.post('/users/check-reset', validateUserCheckReset(), checkResetCode);
+  app.post('/users/reset-password', validateUserResetPassword(), resetPassword);
 };
 
 export default userRoutes;

@@ -5,7 +5,13 @@ dotenv.config();
 const { MAILING_USER, MAILING_PW, FROM_EMAIL } = process.env;
 
 // NOTE  remember to pass options to the function for email and content
-const mail = (email: string, subject: string, link: string, name?: string) => {
+const mail = (
+  email: string,
+  subject: string,
+  link: string,
+  code: string,
+  name?: string
+) => {
   // HERE  create SMTP service to be able to send mails
   const transporter = createTransport({
     service: 'hotmail',
@@ -16,7 +22,7 @@ const mail = (email: string, subject: string, link: string, name?: string) => {
   });
 
   const message = {
-    from: `Beanzo <${FROM_EMAIL}>`,
+    from: `Beanzo-Blog <${FROM_EMAIL}>`,
     to: email,
     subject: subject,
     text: 'For clients with plaintext support only',
@@ -28,6 +34,7 @@ const mail = (email: string, subject: string, link: string, name?: string) => {
       <body>
         <p>Hi ${name},</p>
         <p>You requested to reset your password.</p>
+        <h2>Reset Code: ${code}</h2>
         <p> Please, click the link below to reset your password</p>
           <a href="${link}">Reset Password</a>
       </body>

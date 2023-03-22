@@ -1,4 +1,4 @@
-import { body, param } from 'express-validator';
+import { body, param, query } from 'express-validator';
 
 import { User } from '../../model/user';
 
@@ -62,4 +62,31 @@ export const validateUserAuthenticate = () => {
 
 export const validateUserForgetPassword = () => {
   return [body('email', 'Please provide a valid email.').notEmpty().isEmail()];
+};
+
+export const validateUserCheckReset = () => {
+  return [
+    body('code', 'Please provide a valid email.')
+      .notEmpty()
+      .isAlphanumeric()
+      .isLength({ min: 6, max: 6 }),
+    query('token').notEmpty().isString(),
+    query('id').notEmpty().isString(),
+  ];
+};
+
+export const validateUserResetPassword = () => {
+  return [
+    body('password', 'Invalid password should be 6-16 characters')
+      .isAlphanumeric()
+      .isLength({ min: 6, max: 16 })
+      .notEmpty()
+      .custom((value: string, { req }) => {
+        if (value !== req.body.confirmPassword) {
+          throw new Error('Password confirmation does not match password');
+        }
+        return true;
+      }),
+    query('id').notEmpty().isString(),
+  ];
 };
