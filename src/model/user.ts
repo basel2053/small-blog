@@ -11,6 +11,7 @@ export type TUser = {
   email: string;
   password: string;
   name?: string;
+  confirmed?: boolean;
   refreshtoken?: string[];
 };
 
@@ -70,6 +71,17 @@ export class User {
     }
   }
 
+  async confirmUser(id: string): Promise<void> {
+    try {
+      const conn = await Client.connect();
+      const sql = 'UPDATE users SET confirmed=TRUE WHERE id=$1';
+      await conn.query(sql, [id]);
+      conn.release();
+    } catch (err) {
+      console.log(`Couldn't confirm user ${id}, ${err}`);
+    }
+  }
+
   async delete(id: string): Promise<TUser> {
     try {
       const conn = await Client.connect();
@@ -86,7 +98,7 @@ export class User {
     try {
       const conn = await Client.connect();
       const sql =
-        'INSERT INTO users(email,password,name) VALUES ($1,$2,$3) RETURNING email,name';
+        'INSERT INTO users(email,password,name) VALUES ($1,$2,$3) RETURNING email,name,id';
       const hashedPassword = await bcrypt.hash(
         user.password + PEPPER,
         Number(SR)

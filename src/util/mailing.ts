@@ -1,5 +1,6 @@
 import { createTransport } from 'nodemailer';
 import dotenv from 'dotenv';
+import { confirmTemplate, resetTemplate } from './mail-templates/mails';
 dotenv.config();
 
 const { MAILING_USER, MAILING_PW, FROM_EMAIL } = process.env;
@@ -9,8 +10,8 @@ const mail = (
   email: string,
   subject: string,
   link: string,
-  code: string,
-  name?: string
+  name?: string,
+  code?: string
 ) => {
   // HERE  create SMTP service to be able to send mails
   const transporter = createTransport({
@@ -26,19 +27,7 @@ const mail = (
     to: email,
     subject: subject,
     text: 'For clients with plaintext support only',
-    html: `<!doctype html>
-    <html ⚡4email>
-      <head>
-        <meta charset="utf-8">
-      </head>
-      <body>
-        <p>Hi ${name},</p>
-        <p>You requested to reset your password.</p>
-        <h2>Reset Code: ${code}</h2>
-        <p> Please, click the link below to reset your password</p>
-          <a href="${link}">Reset Password</a>
-      </body>
-    </html>`,
+    html: code ? resetTemplate(link, code, name) : confirmTemplate(link, name),
   };
 
   transporter.sendMail(message, function (err) {

@@ -16,9 +16,11 @@ import {
   validateUserCheckReset,
   validateUserResetPassword,
 } from '../util/validators/userValidators';
+
 import { compare, hash } from 'bcrypt';
 import mail from '../util/mailing';
 import { Token } from '../model/token';
+import { verify } from 'jsonwebtoken';
 dotenv.config();
 
 const store = new User();
@@ -30,6 +32,8 @@ const {
   JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRY,
   SR,
+  JWT_EMAIL,
+  JWT_EMAIL_EXPIRY,
 } = process.env;
 
 const index = async (_req: Request, res: Response): Promise<void> => {
@@ -86,7 +90,6 @@ const create = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  // validation middleware
   const user = await store.create(req.body);
   if (!user) {
     return next(
@@ -98,6 +101,13 @@ const create = async (
       )
     );
   }
+  const confirmToken = signToken(
+    { id: user.id },
+    JWT_EMAIL + '',
+    JWT_EMAIL_EXPIRY + ''
+  );
+  const link = `http://localhost:3000/users/confirm/${confirmToken}`;
+  mail(user.email, 'Email Confirmation', link, user.name);
   res.status(201).json({ message: 'user created', user });
 };
 
@@ -116,6 +126,16 @@ const authenticate = async (
           `Invalid email or password`,
           404,
           'failed to authenticate the user',
+          true
+        )
+      );
+    }
+    if (user.confirmed === false) {
+      return next(
+        new APIError(
+          `Please confirm your email.`,
+          401,
+          'User must confirm email to be able to login',
           true
         )
       );
@@ -193,13 +213,13 @@ const forgotPassword = async (
       .update(resetCode)
       .digest('hex');
 
-    // !  HERE  we can instead of removing all previous reset Tokens, ordering tokens and get last one (DESC) and once user reset password we delete all he created before
+    // !  HERE  instead of removing all previous reset Tokens, ordering tokens and get last one (DESC) and once user reset password we delete all he created before
 
     await reset.removeToken(user.id + '');
     await reset.createToken(hashedToken, hashedCode, user.id);
     // NOTE saved hashs will be later compared to see if we really got valid request or not, resetToken valid for 15min, check if verified
     const link = `http://localhost:5173/reset?token=${resetToken}&id=${user.id}`;
-    mail(user.email, 'Password Reset Request', link, resetCode, user.name);
+    mail(user.email, 'Password Reset Request', link, user.name, resetCode);
     res.status(200).send({ message: 'An E-mail has been sent.' });
   } catch (err) {
     // NOTE we may delete all info we saved if an error happened
@@ -246,7 +266,9 @@ const checkResetCode = async (
         'The reset code has been verified you are ready to change the password',
     });
   } catch (err) {
-    console.log(err);
+    res
+      .status(422)
+      .json({ message: 'error occured while verifying reset code' });
   }
 };
 
@@ -292,6 +314,35 @@ const resetPassword = async (
   }
 };
 
+const confirmEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    // NOTE  we need to validate if the user is confirmed or not
+    const { token } = req.params;
+    const {
+      user: { id },
+    } = verify(token, JWT_EMAIL + '') as { user: { id: number } };
+    const user = await store.getById(id + '');
+    if (!user || user.confirmed) {
+      return next(
+        new APIError(
+          `The Link expired or no user found.`,
+          403,
+          "the user is trying to confirming an email which is alread confirmed or a user that doesn't exists",
+          true
+        )
+      );
+    }
+    await store.confirmUser(id + '');
+    res.status(302).redirect('http://localhost:5173/login?confirmed=true');
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const userRoutes = (app: Application): void => {
   // ! Development purpose only
   app.get('/users', index);
@@ -313,6 +364,7 @@ const userRoutes = (app: Application): void => {
   );
   app.post('/users/check-reset', validateUserCheckReset(), checkResetCode);
   app.post('/users/reset-password', validateUserResetPassword(), resetPassword);
+  app.get('/users/confirm/:token', confirmEmail);
 };
 
 export default userRoutes;
