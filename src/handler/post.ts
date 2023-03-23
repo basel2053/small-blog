@@ -52,7 +52,11 @@ const filter = async (req: Request, res: Response): Promise<void> => {
 const show = async (req: Request, res: Response): Promise<void> => {
   try {
     const post = await store.show(req.params.postId);
-    res.json({ message: 'retrived post sucessfully', post });
+    res.status(200).json({
+      message: 'retrived post sucessfully',
+      post: post.post,
+      comments: post.comments,
+    });
   } catch (err) {
     res.sendStatus(404);
   }

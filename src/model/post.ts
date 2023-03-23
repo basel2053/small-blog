@@ -1,4 +1,5 @@
 import Client from '../database/client';
+import { TCommnet } from './comment';
 
 export type TPost = {
   id?: number;
@@ -24,7 +25,21 @@ export class Post {
     }
   }
 
-  async show(id: string): Promise<TPost> {
+  async show(id: string): Promise<{ post: TPost; comments: TCommnet[] }> {
+    try {
+      const conn = await Client.connect();
+      const sql = 'SELECT * FROM posts WHERE id=$1';
+      const result = await conn.query(sql, [id]);
+      const sql2 = 'SELECT * FROM comments WHERE postid=$1';
+      const result2 = await conn.query(sql2, [id]);
+      conn.release();
+      return { post: result.rows[0], comments: result2.rows };
+    } catch (err) {
+      throw new Error(`Cannot get post ${id}, ${err}`);
+    }
+  }
+
+  async showWithoutComments(id: string): Promise<TPost> {
     try {
       const conn = await Client.connect();
       const sql = 'SELECT * FROM posts WHERE id=$1';
