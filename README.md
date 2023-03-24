@@ -1,13 +1,13 @@
-# Node Rest API for Small Blog App
+# Node Rest API for Small Blog App :rocket:
 
 A Simple Rest API using Node, express, and postgres, which i made for a small react blog. The API provide authentication, google oauth, and ability for users to create posts, comments and manipulate them. Each user having a simple profile.
 
 ## Table of Contents
 
 - [Technologies](#technologies)
-- [Installation](#installation)
 - [Folder Structure](#folder-structure)
-- [Data](#data)
+- [Data Shape](#data-shape)
+- [Installation](#installation)
 - [Usage](#usage)
 - [Testing](#testing)
 - [Feedback](#feedback)
@@ -90,7 +90,8 @@ A Simple Rest API using Node, express, and postgres, which i made for a small re
 └─ dist                                   # build output folder
 ```
 
-## Data
+## Data Shape
+![alt text](https://prnt.sc/ZvP6tabokXQH)
 
 ## Installation
 
