@@ -91,7 +91,8 @@ A Simple Rest API using Node, express, and postgres, which i made for a small re
 ```
 
 ## Data Shape
-![alt text](https://prnt.sc/ZvP6tabokXQH)
+<img src="https://user-images.githubusercontent.com/77590428/227645717-8e091c64-939f-464f-8226-91713281f7ec.png" width="700px" alt="diagram"/>
+
 
 ## Installation
 
