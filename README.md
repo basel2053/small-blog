@@ -96,7 +96,7 @@ A Simple Rest API using Node, express, and postgres, which i made for a small re
 
 ## Installation
 
-### 1) Clone the repository, install node packages 
+### 1) Clone the repository, install node packages.
 
 ``` 
 //on local
@@ -104,9 +104,11 @@ git clone https://github.com/basel2053/small-blog
 cd small-blog
 npm install
 ```
-### 2) Environment variables
+### 2) Setting database and user. 
 
-### 3) Setting database and user 
+### 3) Environment variables.
+
+
 
 ## Usage
 
