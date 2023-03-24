@@ -98,11 +98,13 @@ A Simple Rest API using Node, express, and postgres, which i made for a small re
 
 Install the API with npm
 
-```bash
-  npm install my-project
-  cd my-project
+``` 
+//on local
+git clone https://github.com/basel2053/small-blog
+cd small-blog
+npm install
+npm run start:tsdev
 ```
-
 ## Usage
 
 ## Testing
