@@ -105,9 +105,41 @@ cd small-blog
 npm install
 ```
 ### 2) Setting database and user. 
+For setting up postgres you will need:
+
+1. Create a database for the project.
+2. Ensure to have user with privileges to the database.
+3. Create database.json file for migrations [Check this link](https://db-migrate.readthedocs.io/en/latest/Getting%20Started/configuration/)
+4. Run migration up script `npm run m-up`
 
 ### 3) Environment variables.
+To run this project, you will need to add the following environment variables to your .env file
 
+- Database: `PG_HOST`
+`PG_DB`
+`PG_PASSWORD`
+
+- JWT:  `JWT_SECRET`
+`JWT_REFRESH_SECRET`
+`JWT_ACCESS_EXPIRY`
+`JWT_REFRESH_EXPIRY`
+
+- Confirm E-mail: `JWT_EMAIL`
+`JWT_EMAIL_EXPIRY`
+
+- Cookie `COOKIE_SECRET`
+
+- Hashing: `SR`
+`PEPPER`
+
+- Logging: `LOG_FILE_PATH`
+
+- nodemailer: `MAILING_USER`
+`MAILING_PW`
+`FROM_EMAIL`
+
+- Google Auth: `GOOGLE_AUTH_CLIENTID`
+`GOOGLE_AUTH_SECRET`
 
 
 ## Usage
