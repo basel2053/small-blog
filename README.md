@@ -87,7 +87,7 @@ A Simple Rest API using Node, express, and postgres, which i made for a small re
 │   │
 │   └── audit                             # saving file for auditing actions
 │
-└─ dist             # build output folder
+└─ dist                                   # build output folder
 ```
 
 ## Data
