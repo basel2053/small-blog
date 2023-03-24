@@ -106,6 +106,11 @@ Install the API with npm
 ## Usage
 
 ## Testing
+> Note: `still under progress`.
+
+```bash
+  npm run test
+```
 
 ## Feedback
 
