@@ -19,15 +19,6 @@ A Simple Rest API using Node, express, and postgres, which i made for a small re
 - [Express](https://expressjs.com/) - Javascript API Framework
 - [TypeScript](https://www.typescriptlang.org/) - Superset of Javascript
 
-## Installation
-
-Install the API with npm
-
-```bash
-  npm install my-project
-  cd my-project
-```
-
 ## Folder Structure
 
 ```bash
@@ -83,14 +74,32 @@ Install the API with npm
 │   │   └── payload.ts                    # simple interface for jwt payload in verify middleware
 │   │
 │   ├── handler
-│   │   ├──
-│   │   ├──
-│   └── index.js # You should not need to modify this file. It is used for DOM rendering only.
+│   │   ├── comment.ts                    # handles (create - edit -delete) comment requests
+│   │   ├── oauth2.ts                     # handles oauth2 google authentication
+│   │   ├── post.ts                       # handles posts (filteration + pagiantion - CRUDS)
+│   │   ├── refreshToken.ts               # handles refreshing jwt tokens, loggingout
+│   │   └── user.ts                       # handles signup, login, user profile ( contains some dev methods too)
+│   │
+│   ├── Error                             # some files with simple classes to create customized error
+│   │
+│   ├── database                          
+│   │   └── client.ts                     # creating pg Pool, to use it with models for querying postgres 
+│   │
+│   └── audit                             # saving file for auditing actions
 │
 └─ dist             # build output folder
 ```
 
 ## Data
+
+## Installation
+
+Install the API with npm
+
+```bash
+  npm install my-project
+  cd my-project
+```
 
 ## Usage
 
