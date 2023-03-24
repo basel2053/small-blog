@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import Audit, { IAudit } from 'model/audit';
-import APIError from 'Error/ApiError';
-import ErrorType from 'Error/error.type';
+import Audit, { IAudit } from '../model/audit';
+import APIError from '../Error/ApiError';
+import ErrorType from '../Error/error.type';
 
 const emitter = new EventEmitter();
 

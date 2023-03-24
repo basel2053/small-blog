@@ -1,4 +1,4 @@
-import dateFormat from 'util/date';
+import dateFormat from '../util/date';
 import winston from 'winston';
 
 class LoggerService {
