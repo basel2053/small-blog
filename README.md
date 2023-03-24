@@ -146,7 +146,6 @@ To run this project, you will need to add the following environment variables to
 
 ### Scripts
 
-1. **Running the app**
 
 ```
 npm start                   -runs the app in production 
@@ -156,34 +155,25 @@ npm run start:debug         -runs the app with debugging
 npm run start:tsdev         -runs the app watch mode in typescript
 
 npm run start:dev:watch     -runs the app watch mode in typescript and compiling to javascript
-```
-2. **Building**
 
-```
+
 npm run build               -compiles typescript to javascript (./dist)
 
 npm run build:watch         -compiles to javascript on change
-```
 
-3. **Database Migrations**
 
-```
 npm run m-up                -runs migrations up files   (creating tables)
 
 npm run m-down              -runs migrations down files (dropping tables)
-```
-4. **Tests**
 
-```
+
 npm test                    -mocha tests
 
 npm run test:watch          -watch mode for tests
 
 npm run coverage            -output coverage of tests in the app
-```
-5. **Linting**
 
-```
+
 npm run lint                -linting script
 ```
 
