@@ -109,7 +109,7 @@ Install the API with npm
 
 ### Unit Tests:
 
-Unit tests are using the mocha Framework, with chai as assertion library ,and nyc for tests coverage
+Unit tests are using the mocha Framework, with chai as assertion library , and nyc for tests coverage.
 
 > Note: `still under progress`.
 
