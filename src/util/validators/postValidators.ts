@@ -8,7 +8,7 @@ export const validatePostCreate = () => {
       .notEmpty()
       .isString()
       .isLength({ min: 3, max: 50 }),
-    body('description', 'Invalid description').notEmpty().isLength({ min: 16 }),
+    body('description', 'Invalid description').notEmpty().isLength({ min: 50 }),
     body('field', 'Invalid field').isIn([
       'Web Programming',
       'Embedded System',
@@ -31,7 +31,7 @@ export const validatePostUpdate = () => {
       .notEmpty()
       .isString()
       .isLength({ min: 3, max: 50 }),
-    body('description', 'Invalid description').notEmpty().isLength({ min: 16 }),
+    body('description', 'Invalid description').notEmpty().isLength({ min: 50 }),
   ];
 };
 
