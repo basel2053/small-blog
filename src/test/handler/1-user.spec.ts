@@ -130,8 +130,8 @@ describe('User handler', () => {
       // IMPORTANT  the code is only 6 digits
       const response = await request(app)
         .post('/users/check-reset')
-        .send({ code: 1234567 })
-        .query({ id })
+        .send({ code: 111111 })
+        .query({ id, token: 'dummy-token' })
         .set('Accept', 'application/json');
       expect(response.status).eq(404);
       expect(response.body.error).eq(
@@ -181,12 +181,3 @@ describe('User handler', () => {
     });
   });
 });
-
-/*
-const response = await request(app)
-        .post('/users/login')
-        .send(user)
-        .set('Accept', 'application/json');
-      expect(response.status).eq(404);
-      expect(response.body.error).eq('Invalid email or password');
-       */

@@ -8,6 +8,7 @@ import {
   validateCommentDelete,
   validateCommentUpdate,
 } from '../util/validators/commentValidators';
+import validation from '../middleware/validation';
 
 const store = new Comment();
 const postStore = new Post();
@@ -93,12 +94,18 @@ const remove = async (
 
 const commentsRoutes = (app: Application) => {
   // NOTE  Ideally it would be better to make routes --> /posts/:postId/comments
-  app.post('/comments', verifyToken, validateCommentCreate(), create);
+  app.post(
+    '/comments',
+    verifyToken,
+    validateCommentCreate(),
+    validation,
+    create
+  );
 
   app
     .route('/comments/:commentId')
-    .patch(verifyToken, validateCommentUpdate(), update)
-    .delete(verifyToken, validateCommentDelete(), remove);
+    .patch(verifyToken, validateCommentUpdate(), validation, update)
+    .delete(verifyToken, validateCommentDelete(), validation, remove);
 };
 
 export default commentsRoutes;

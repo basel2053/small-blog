@@ -49,9 +49,23 @@ const filter = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const show = async (req: Request, res: Response): Promise<void> => {
+const show = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const post = await store.show(req.params.postId);
+    if (!post.post) {
+      return next(
+        new APIError(
+          `couldn't find post ${req.params.postId}`,
+          404,
+          'failed to find the post',
+          true
+        )
+      );
+    }
     res.status(200).json({
       message: 'retrived post sucessfully',
       post: post.post,
@@ -65,7 +79,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const author = res.locals.username;
     const post = await store.create({ ...req.body, author });
-    res.json({ message: 'post created sucessfully', data: post });
+    res.status(201).json({ message: 'post created sucessfully', data: post });
   } catch (err) {
     throw new Error(`couldn't create post , ${err}`);
   }

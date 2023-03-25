@@ -375,10 +375,21 @@ const userRoutes = (app: Application): void => {
   app.post(
     '/users/forgot-password',
     validateUserForgetPassword(),
+    validation,
     forgotPassword
   );
-  app.post('/users/check-reset', validateUserCheckReset(), checkResetCode);
-  app.post('/users/reset-password', validateUserResetPassword(), resetPassword);
+  app.post(
+    '/users/check-reset',
+    validateUserCheckReset(),
+    validation,
+    checkResetCode
+  );
+  app.post(
+    '/users/reset-password',
+    validateUserResetPassword(),
+    validation,
+    resetPassword
+  );
   app.get('/users/confirm/:token', confirmEmail);
 };
 
