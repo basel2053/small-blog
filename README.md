@@ -144,6 +144,99 @@ To run this project, you will need to add the following environment variables to
 
 ## Usage
 
+### Scripts
+
+
+```
+npm start                   -runs the app in production 
+
+npm run start:debug         -runs the app with debugging
+
+npm run start:tsdev         -runs the app watch mode in typescript
+
+npm run start:dev:watch     -runs the app watch mode in typescript and compiling to javascript
+
+
+npm run build               -compiles typescript to javascript (./dist)
+
+npm run build:watch         -compiles to javascript on change
+
+
+npm run m-up                -runs migrations up files   (creating tables)
+
+npm run m-down              -runs migrations down files (dropping tables)
+
+
+npm test                    -mocha tests
+
+npm run test:watch          -watch mode for tests
+
+npm run coverage            -output coverage of tests in the app
+
+
+npm run lint                -linting script
+```
+
+### Endpoints
+
+### Auth
+
+POST - `/users/signup` Signup =>  body: { email, password, confirmPassword, name }
+
+POST - `/users/login` Login =>  body: { email, password }
+
+POST - `/users/forgot-password` Forget Password =>  body: { email }
+
+POST - `/users/check-reset` Check Reset Code =>  body: { code }  query:{ id, token }
+
+POST - `/users/reset-password` Set New Password =>  body: { password, confirmPassword }
+
+GET  -  `/users/confirm/:token` Confirm E-mail 
+
+GET  -  `/token/refresh` Refresh Access Token
+
+GET  -  `/logout` Signout 
+
+### Users
+
+GET - `/users/:author` Fetch Single User
+
+> NOTE: `Next 3 Endpoints are for dev purpose only.`
+
+GET - `/users` Fetch All Users
+
+DELETE - `/users/:id` Delete User By ID
+
+PATCH  - `/users/:id` Update User By ID
+
+
+### Posts
+
+POST - `/posts` Create New Post => body: { title, description, image, field }
+
+GET - `/posts` Fetch All Posts
+
+GET - `/filter` Fetch All Posts With Pagination
+
+GET - `/posts/:postId` Fetch Single Post With It's Comments
+
+DELETE - `/posts/:postId`  Delete Post By ID
+
+PATCH - `/posts/:postId`   Update Post By ID
+
+### Comments
+
+POST - `/comments` Creates New Comment => body: { body, postId }
+
+DELETE - `/comments/:commentId`  Delete Comment By ID
+
+PATCH - `/comments/:commentId`   Update Comment By ID
+
+
+### OAuth
+
+POST - `/users/oauth2/google` Google Auth => body: { code }
+
 ## Testing
 
 ### Unit Tests:
