@@ -1,4 +1,7 @@
 {
-	"watch": "true",
-	"spec": "./src/**/*.spec.js"
+  "watch": "false",
+  "spec": "./src/**/*.spec.ts",
+  "exit": "true",
+  "extension": ["ts"],
+  "require": "ts-node/register"
 }

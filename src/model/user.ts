@@ -15,9 +15,6 @@ export type TUser = {
   refreshtoken?: string[];
 };
 
-interface IUserPosts extends TPost {
-  name: string;
-}
 export class User {
   async index(): Promise<TUser[]> {
     try {
@@ -31,15 +28,16 @@ export class User {
     }
   }
 
-  async show(author: string): Promise<IUserPosts[]> {
+  async show(author: string): Promise<{ author: TUser; posts: TPost[] }> {
     try {
       const conn = await Client.connect();
-      // IMPORTANT  remember later to get the avatar of the user, and NOTE name already exists in the posts author field
-      const sql =
-        'SELECT name,p.* FROM users INNER JOIN posts p ON name=p.author WHERE name=$1 ORDER BY p.id DESC LIMIT 6';
+      const sql = 'SELECT * FROM users WHERE name=$1';
       const result = await conn.query(sql, [author]);
+      const sql2 =
+        'SELECT * FROM posts p WHERE author=$1 ORDER BY p.id DESC LIMIT 6';
+      const result2 = await conn.query(sql2, [author]);
       conn.release();
-      return result.rows;
+      return { author: result.rows[0], posts: result2.rows };
     } catch (err) {
       throw new Error(`Cannot get user ${author}, ${err}`);
     }

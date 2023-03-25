@@ -45,12 +45,27 @@ const index = async (_req: Request, res: Response): Promise<void> => {
   }
 };
 
-const show = async (req: Request, res: Response): Promise<void> => {
+const show = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const user = await store.show(req.params.author);
+    if (!user.author) {
+      return next(
+        new APIError(
+          `couldn't find user ${req.params.author}`,
+          404,
+          'failed while trying to get the user',
+          true
+        )
+      );
+    }
     res.json({
-      message: 'retrived the user ',
-      author: user,
+      message: 'retrived the user',
+      author: user.author,
+      posts: user.posts,
     });
   } catch (err) {
     throw new Error(`couldn't find user,${req.params.id} , ${err}`);
@@ -94,9 +109,9 @@ const create = async (
   if (!user) {
     return next(
       new APIError(
-        `couldn't update user ${req.params.id}`,
+        `couldn't create user ${req.params.id}`,
         404,
-        'failed while trying to update the user',
+        'failed while trying to create the user',
         true
       )
     );
@@ -182,7 +197,7 @@ const authenticate = async (
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.json({ name: user.name, accessToken: token });
+    res.status(200).json({ name: user.name, accessToken: token });
   } catch (err) {
     throw new Error(`couldn't authenticate user, ${req.body.email} , ${err}`);
   }
