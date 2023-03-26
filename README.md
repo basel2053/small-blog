@@ -181,7 +181,7 @@ npm run lint                -linting script
 
 ### Documentation
 
-GET - `/api-docs` Swagger UI documentation
+GET - `/api-docs` Swagger UI
 
 ### Auth
 
