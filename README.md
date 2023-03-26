@@ -52,7 +52,7 @@ A Simple Rest API using Node, express, and postgres, which i made for a small re
 │   │   └── mail-templates
 │   │        └── mail.ts                  # contains 2 html templates for mails (confirm - reset)
 │   │
-│   ├── test                              # mocha tests folder (not implemented yet)
+│   ├── test                              # mocha tests folder
 │   │
 │   ├── services
 │   │   ├── audit.service.ts              # service for generating audits record in the app
