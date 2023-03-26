@@ -769,8 +769,15 @@
             "in": "body",
             "description": "the comment content",
             "required": true,
-            "type": "string",
-            "example": "nicely updated"
+            "schema": {
+              "type": "object",
+              "properties": {
+                "body": {
+                  "type": "string",
+                  "example": "nicely updated"
+                }
+              }
+            }
           }
         ],
         "responses": {
