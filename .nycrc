@@ -1,5 +1,5 @@
 {
-	"all": true,
-	"include": ["src/**/*.js"],
-	"exclude": ["**/*.spec.js"]
+  "all": true,
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.spec.js"]
 }
