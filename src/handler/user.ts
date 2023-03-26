@@ -361,8 +361,14 @@ const confirmEmail = async (
 const userRoutes = (app: Application): void => {
   // ! Development purpose only
   app.get('/users', index);
-  app.delete('/users/:id', remove);
-  app.patch('/users/:id', validateUserUpdate(), validation, update);
+  app.delete('/users/:id', verifyToken, remove);
+  app.patch(
+    '/users/:id',
+    verifyToken,
+    validateUserUpdate(),
+    validation,
+    update
+  );
   // HERE  . our used routes
   app.get('/users/:author', verifyToken, show);
   app.post('/users/signup', validateUserCreate(), validation, create);

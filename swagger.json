@@ -1,65 +1,954 @@
 {
-	"swagger": "2.0",
-	"info": {
-		"version": "1.0.0",
-		"title": "Small BLOG API ",
-		"description": "just a small blog using PERN",
-		"license": {
-			"name": "MIT",
-			"url": "https://opensource.org/licenses/MIT"
-		}
-	},
-	"host": "localhost:3000",
-	"basePath": "/",
-	"tags": [
-		{
-			"name": "Blog & Social",
-			"description": "API where people share ideas and stuff"
-		}
-	],
-	"schemes": ["http"],
-	"consumes": ["application/json"],
-	"produces": ["application/json"],
-	"paths": {
-		"/users": {
-			"get": {
-				"description": "Returns all users from the system ",
-				"produces": ["application/json"],
-				"responses": {
-					"200": {
-						"description": "A list of users.",
-						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/definitions/Item"
-							}
-						}
-					}
-				}
-			}
-		}
-	},
-	"definitions": {
-		"Item": {
-			"type": "object",
-			"required": ["_id", "title", "price"],
-			"properties": {
-				"_id": {
-					"type": "string"
-				},
-				"title": {
-					"type": "string"
-				},
-				"price": {
-					"type": "integer"
-				},
-				"description": {
-					"type": "string"
-				}
-			}
-		},
-		"items": {
-			"$ref": "#/definitions/Item"
-		}
-	}
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Small BLOG API ",
+    "description": "API where people share ideas, small blog using PERN.",
+    "contact": { "email": "bassel2053@gmail.com" },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Authentication to access protected resources"
+    },
+    {
+      "name": "user",
+      "description": "Operations about user"
+    },
+    {
+      "name": "blog",
+      "description": "Access the blog posts and comments (protected resources)"
+    }
+  ],
+  "schemes": ["http"],
+  "produces": ["application/json"],
+  "paths": {
+    "/users/signup": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Create a new user",
+        "description": "creating new users in blog",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "operationId": "addUser",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Created user object",
+            "required": true,
+            "schema": { "$ref": "#/definitions/NewUser" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string", "example": "user created" },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "test@example.com"
+                    },
+                    "name": { "type": "string", "example": "john" },
+                    "id": { "type": "number", "example": 10 }
+                  }
+                }
+              }
+            }
+          },
+          "422": { "description": "Validation error happened" }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "User signin",
+        "description": "User login to get access to blog resources like posts, comments and profiels NOTE: Must confirm E-mail to login.",
+        "operationId": "login",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Login object",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "test@example.com"
+                },
+                "password": { "type": "string", "example": "000000" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User is authenticated",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "example": "john" },
+                "accessToken": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": { "description": "E-mail is not confirmed" },
+          "404": {
+            "description": "There is no user with such a combination of email and password"
+          },
+          "422": { "description": "Validation error happened" }
+        }
+      }
+    },
+
+    "/users/forgot-password": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Forgot password",
+        "description": "Sending a request to get an e-mail which provides a code and a link, which can be used to be able to reset the password",
+        "operationId": "forgot",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "email",
+            "description": "forgotten account email",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "test@example.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User will recieve email to reset password",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "An E-mail has been sent."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "There is no user with such an email"
+          },
+          "422": { "description": "Validation error happened" }
+        }
+      }
+    },
+
+    "/users/check-reset": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Check reset code",
+        "description": "Checks if the user provided proper reset token and code to gain access to rese the password",
+        "operationId": "checkCode",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "code",
+            "description": "reset code",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "description": "token for reset request",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "description": "user id",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user provided correct reset code.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "The reset code has been verified you are ready to change the password"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "There reset token expired token or wrong code was provided"
+          },
+          "422": { "description": "Validation error happened" }
+        }
+      }
+    },
+
+    "/users/reset-password": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Provide new password",
+        "description": "The user will provide new password after submitting reset request and providing correct reset token and code.",
+        "operationId": "reset",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "code",
+            "description": "reset code",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string",
+                  "example": "new123"
+                },
+                "confirmPassword": {
+                  "type": "string",
+                  "example": "new123"
+                }
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "description": "user id",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "user sucessfully created a new password.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "You changed your password successfully."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Password reset code is not verified and user won't be allowed to change the password."
+          },
+          "422": { "description": "Validation error happened" }
+        }
+      }
+    },
+
+    "/users/confirm/{token}": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "user email confirmation",
+        "description": "The user will provide new password after submitting reset request and providing correct reset token and code.",
+        "operationId": "confirmEmail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "description": "confirmation token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirecting user after confirming the email, to be able to login."
+          },
+          "403": {
+            "description": "User is trying to confirm an email which is alread confirmed or a user that doesn't exists."
+          }
+        }
+      }
+    },
+
+    "/logout": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "Logout user",
+        "description": "Will log user out from the blog and remove user refresh token, the user must provide a refresh token otherwise the user is not even logged in to logout, also refresh tokens are stored in http cookie.",
+        "operationId": "logout",
+        "responses": {
+          "204": {
+            "description": "The user is logged out from reaching blog protected resources."
+          },
+
+          "403": {
+            "description": "not allowed do such an action, because user got  no refresh token available in cookies."
+          },
+          "404": {
+            "description": "There is no user found for the token provided"
+          }
+        }
+      }
+    },
+
+    "/token/refresh": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "refresh user access token",
+        "description": "Generate a new access token for the user form refresh token to be able to preserve consistent login for users in the blog.",
+        "operationId": "refreshToken",
+        "responses": {
+          "200": {
+            "description": "a new access token is generated and is sent to the client.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "user token refreshed"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "john"
+                },
+                "accessToken": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User is not allowed to generate a new access token if there is no refresh token"
+          },
+          "403": {
+            "description": "Refresh token reuse is detected and the all of the user refresh tokens will be deleted"
+          }
+        }
+      }
+    },
+
+    "/users": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Returns a list of users.",
+        "description": "Returns all users from the system ",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "A list of users.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "name": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/users/:{author}": {
+      "get": {
+        "tags": ["user"],
+        "summary": "author with published posts",
+        "description": "Returns an author and her/his latest 6 posts",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author",
+            "description": "author we want to get (name)",
+            "required": true,
+            "type": "string",
+            "example": "john"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Author profile.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string", "example": "retrived the user" },
+                "author": { "type": "string", "example": "Bassel" },
+                "posts": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Post"
+                  }
+                }
+              }
+            }
+          },
+
+          "403": {
+            "description": "JWT token must be provided"
+          },
+          "404": {
+            "description": "The author doesn't exists"
+          }
+        }
+      }
+    },
+
+    "/posts": {
+      "get": {
+        "tags": ["blog"],
+        "summary": "fetch all posts",
+        "description": "get all of the posts in the blog",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "all blog posts",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "retrived posts sucessfully"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Post"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "JWT token must be provided"
+          }
+        }
+      },
+
+      "post": {
+        "tags": ["blog"],
+        "summary": "Create new post",
+        "description": "Create a new post inside of the blog",
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "operationId": "addPost",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "formData",
+            "description": "post title",
+            "required": true,
+            "type": "string",
+            "example": "Hello World"
+          },
+          {
+            "name": "description",
+            "in": "formData",
+            "description": "post description",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "field",
+            "in": "formData",
+            "description": "post field",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "Web Programming",
+              "Embedded System",
+              "Cyber Security",
+              "Mobile Development",
+              "DevOps",
+              "Cloud Architect",
+              "Software Testing",
+              "Data Analytics & Visualization",
+              "UI/UX",
+              "System Admin"
+            ]
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "description": "post image to upload",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "new post created sucessfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "post created sucessfully"
+                },
+                "data": {
+                  "$ref": "#/definitions/Post"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "JWT token must be provided"
+          }
+        }
+      }
+    },
+
+    "/posts/{postId}": {
+      "get": {
+        "tags": ["blog"],
+        "summary": "get post by id",
+        "description": "get a post by id, with all of its comments.",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ID of post to get",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the post was retrived sucessfully along with its comments",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "retrived post sucessfully"
+                },
+                "post": {
+                  "$ref": "#/definitions/Post"
+                },
+                "comments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Comment"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "JWT token must be provided"
+          },
+          "404": {
+            "description": "No post with the id provided was found"
+          }
+        }
+      },
+
+      "patch": {
+        "tags": ["blog"],
+        "summary": "update a post",
+        "description": "User can update posts that they created.",
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "operationId": "addPost",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ID of post to update",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "title",
+            "in": "formData",
+            "description": "post title",
+            "required": false,
+            "type": "string",
+            "example": "Hello World Edited"
+          },
+          {
+            "name": "description",
+            "in": "formData",
+            "description": "post description",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "field",
+            "in": "formData",
+            "description": "post field",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Web Programming",
+              "Embedded System",
+              "Cyber Security",
+              "Mobile Development",
+              "DevOps",
+              "Cloud Architect",
+              "Software Testing",
+              "Data Analytics & Visualization",
+              "UI/UX",
+              "System Admin"
+            ]
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "description": "post image to upload",
+            "required": false,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the user existing post was updated",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "post updated sucessfully"
+                },
+                "data": {
+                  "$ref": "#/definitions/Post"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "JWT token must be provided"
+          },
+          "404": {
+            "description": "the post to update was not found or it belongs to another user"
+          },
+          "500": {
+            "description": "Error may be thrown when trying to remove an old image"
+          }
+        }
+      },
+
+      "delete": {
+        "tags": ["blog"],
+        "summary": "delete a post",
+        "description": "User can delete posts that they created.",
+        "produces": ["application/json"],
+        "operationId": "deletePost",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ID of post to delete",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "user post has been deleted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "posts deleted sucessfully"
+                },
+                "data": {
+                  "$ref": "#/definitions/Post"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "JWT token must be provided"
+          },
+          "404": {
+            "description": "the post to delete was not found or it belongs to another user"
+          }
+        }
+      }
+    },
+
+    "/comments": {
+      "post": {
+        "tags": ["blog"],
+        "summary": "create a comment",
+        "description": "Leave a comment for any post you like",
+        "operationId": "addComment",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "comment object",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "body": { "type": "string", "example": "nice post" },
+                "postId": { "type": "integer", "example": 14 }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "a new comment created for provided postId",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Comment created"
+                },
+                "data": {
+                  "$ref": "#/definitions/Comment"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "JWT token must be provided"
+          },
+          "404": {
+            "description": "Trying to create a comment for a post which doesn't exists"
+          }
+        }
+      }
+    },
+
+    "/comments/{commentId}": {
+      "patch": {
+        "tags": ["blog"],
+        "summary": "updating a comment",
+        "description": "Update user comment body, only user created the comment who can edit it",
+        "operationId": "updateComment",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "the id of comment to update",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "the comment content",
+            "required": true,
+            "type": "string",
+            "example": "nicely updated"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the comment with the id provided is updated.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Comment is successfully edited"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "JWT token must be provided or trying to update another user comment"
+          }
+        }
+      },
+
+      "delete": {
+        "tags": ["blog"],
+        "summary": "delete a comment",
+        "description": "deleting a comment with the provided id, only comment creator or post owner can delete the comment",
+        "operationId": "deleteComment",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "the id of comment to deleted",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Comment is deleted successfully"
+          },
+          "403": {
+            "description": "JWT token must be provided or trying to delete another user comment"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "required": ["email", "password", "name"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "user id"
+        },
+        "email": {
+          "type": "string",
+          "description": "unique email for every user account"
+        },
+        "password": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string",
+          "description": "works as username for users which will be displayed on their profile"
+        },
+        "confirmed": {
+          "type": "boolean",
+          "description": "must be true for users to be able to login"
+        },
+        "refreshtoken": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "refresh token which will be sent in a cookie"
+        }
+      }
+    },
+    "NewUser": {
+      "type": "object",
+      "required": ["email", "password", "confirmPassword", "name"],
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "unique email for every user account",
+          "example": "test@example.com"
+        },
+        "password": {
+          "type": "string",
+          "description": "the user password should be 6-16 characters",
+          "example": "000000"
+        },
+        "confirmPassword": {
+          "type": "string",
+          "description": "it needs to match the password",
+          "example": "000000"
+        },
+        "name": {
+          "type": "string",
+          "description": "name which acts as username, need to be unique",
+          "example": "john"
+        }
+      }
+    },
+    "Post": {
+      "type": "object",
+      "required": ["title", "description", "image", "field"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "post id",
+          "example": 1
+        },
+        "title": {
+          "type": "string",
+          "description": "title of the post"
+        },
+        "description": {
+          "type": "string",
+          "description": "the description which will be fully showed in post details"
+        },
+        "field": {
+          "type": "string",
+          "enum": [
+            "Web Programming",
+            "Embedded System",
+            "Cyber Security",
+            "Mobile Development",
+            "DevOps",
+            "Cloud Architect",
+            "Software Testing",
+            "Data Analytics & Visualization",
+            "UI/UX",
+            "System Admin"
+          ],
+          "description": "programming field which the post is related to"
+        },
+        "image": {
+          "type": "string",
+          "description": "contains the image url"
+        },
+        "readtime": {
+          "type": "number",
+          "description": "how long does it take to read the post"
+        }
+      }
+    },
+
+    "Comment": {
+      "type": "object",
+      "required": ["id", "author", "postid", "body"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "comment id",
+          "example": 3
+        },
+        "author": {
+          "type": "string",
+          "example": "Bassel",
+          "description": "user who left the comment"
+        },
+        "postid": {
+          "type": "number",
+          "description": "the post which the comment belongs to",
+          "example": 14
+        },
+        "body": {
+          "type": "string",
+          "description": "title of the post",
+          "example": "nice explanation"
+        },
+        "createdat": {
+          "type": "string",
+          "description": "time when the comment was created",
+          "example": "1679581605587"
+        }
+      }
+    }
+  }
 }

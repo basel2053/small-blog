@@ -131,7 +131,7 @@ const logout = async (
       return next(
         new APIError(
           `cannot be accessed`,
-          204,
+          404,
           'failed to fetch the user info',
           true
         )
