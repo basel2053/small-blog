@@ -10,17 +10,3 @@ describe('Oauth2 handler => GET /users/oauth2/google', () => {
     expect(response.status).eq(500);
   });
 });
-
-// HERE  m-down:test
-
-/*  
-     const response = await request(app)
-        .get('/posts')
-        .expect('Content-Type', /json/);
-      expect(response.status).eq(403);
-      expect(response.body.error).eq('No token was provided');
-      */
-
-//  {
-//     contentType: 'application/octet-stream',
-//   }
