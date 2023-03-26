@@ -179,6 +179,10 @@ npm run lint                -linting script
 
 ### Endpoints
 
+### Documentation
+
+GET - `/api-docs` Swagger UI documentation
+
 ### Auth
 
 POST - `/users/signup` Signup =>  body: { email, password, confirmPassword, name }
