@@ -86,8 +86,8 @@ const update = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const user = await store.update(req.params.id, req.body.password);
-  if (!user) {
+  const user = await store.getById(req.params.id);
+  if (!user || user.id !== res.locals.userId) {
     return next(
       new APIError(
         `couldn't update user ${req.params.id}`,
@@ -97,7 +97,8 @@ const update = async (
       )
     );
   }
-  res.json({ message: 'updated the user ', data: user });
+  await store.updateProfile(req.params.id, req.body.bio);
+  res.status(200).json({ message: 'user bio is updated' });
 };
 
 const create = async (
@@ -197,7 +198,7 @@ const authenticate = async (
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ name: user.name, accessToken: token });
+    res.status(200).json({ id: user.id, name: user.name, accessToken: token });
   } catch (err) {
     throw new Error(`couldn't authenticate user, ${req.body.email} , ${err}`);
   }
@@ -362,6 +363,7 @@ const userRoutes = (app: Application): void => {
   // ! Development purpose only
   app.get('/users', index);
   app.delete('/users/:id', verifyToken, remove);
+  // HERE  . our used routes
   app.patch(
     '/users/:id',
     verifyToken,
@@ -369,7 +371,6 @@ const userRoutes = (app: Application): void => {
     validation,
     update
   );
-  // HERE  . our used routes
   app.get('/users/:author', verifyToken, show);
   app.post('/users/signup', validateUserCreate(), validation, create);
   app.post(

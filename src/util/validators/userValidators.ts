@@ -36,16 +36,20 @@ export const validateUserCreate = () => {
 
 export const validateUserUpdate = () => {
   return [
-    body('password', 'Invalid password should be 6-16 characters')
-      .isAlphanumeric()
-      .isLength({ min: 6, max: 16 })
-      .notEmpty()
-      .custom((value: string, { req }) => {
-        if (value !== req.body.confirmPassword) {
-          throw new Error('Password confirmation does not match password');
-        }
-        return true;
-      }),
+    // body('password', 'Invalid password should be 6-16 characters')
+    //   .isAlphanumeric()
+    //   .isLength({ min: 6, max: 16 })
+    //   .notEmpty()
+    //   .custom((value: string, { req }) => {
+    //     if (value !== req.body.confirmPassword) {
+    //       throw new Error('Password confirmation does not match password');
+    //     }
+    //     return true;
+    //   }),
+    body('bio', 'Invalid Bio')
+      .isString()
+      .isLength({ min: 1, max: 100 })
+      .notEmpty(),
     param('id').notEmpty().isNumeric(),
   ];
 };

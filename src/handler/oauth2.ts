@@ -65,7 +65,7 @@ const googleAuth = async (
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ name: user.name, accessToken: token });
+    res.status(200).json({ name: user.name, id: user.id, accessToken: token });
   } catch (err) {
     res.sendStatus(500);
   }

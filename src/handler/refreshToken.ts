@@ -95,6 +95,7 @@ const refreshToken = async (
         res.json({
           message: 'user token refreshed',
           name: user.name,
+          id: user.id,
           accessToken,
         });
       }

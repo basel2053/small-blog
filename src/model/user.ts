@@ -31,7 +31,7 @@ export class User {
   async show(author: string): Promise<{ author: TUser; posts: TPost[] }> {
     try {
       const conn = await Client.connect();
-      const sql = 'SELECT name,email FROM users WHERE name=$1';
+      const sql = 'SELECT name,email,bio FROM users WHERE name=$1';
       const result = await conn.query(sql, [author]);
       const sql2 =
         'SELECT * FROM posts p WHERE author=$1 ORDER BY p.id DESC LIMIT 6';
@@ -64,6 +64,17 @@ export class User {
       const result = await conn.query(sql, [hashedPassword, [], id]);
       conn.release();
       return result.rows[0];
+    } catch (err) {
+      console.log(`Cannot get user ${id}, ${err}`);
+    }
+  }
+
+  async updateProfile(id: string, bio: string): Promise<void> {
+    try {
+      const conn = await Client.connect();
+      const sql = 'UPDATE users SET bio=$1 WHERE id=$2';
+      await conn.query(sql, [bio, id]);
+      conn.release();
     } catch (err) {
       console.log(`Cannot get user ${id}, ${err}`);
     }
