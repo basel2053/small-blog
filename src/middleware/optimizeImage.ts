@@ -10,7 +10,7 @@ const optimizeImage = async (
   if (!req.file && req.method === 'PATCH') {
     return next();
   }
-  const folder = process.env.ENV === 'TEST' ? 'test_upload' : 'upload';
+  const folder = process.env.ENV === 'TEST' ? 'test_upload' : 'uploads';
   const path = `${folder}/${uuidv4()} - ${req.file?.originalname}`;
   try {
     await sharp(req.file?.buffer).resize(600, 400).toFile(path);
