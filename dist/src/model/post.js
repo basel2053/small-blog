@@ -69,10 +69,11 @@ class Post {
                     conn.release();
                     return null;
                 }
-                const sql2 = 'UPDATE posts SET title=$1,description=$2,image=$3, field=$4 WHERE id=$5 RETURNING *';
+                const sql2 = 'UPDATE posts SET title=$1,description=$2,html=$3, image=$4, field=$5 WHERE id=$6 RETURNING *';
                 const result2 = yield conn.query(sql2, [
                     post.title,
                     post.description,
+                    post.html,
                     post.image ? post.image : result.rows[0].image,
                     post.field,
                     id,
@@ -109,14 +110,15 @@ class Post {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const conn = yield client_1.default.connect();
-                const sql = 'INSERT INTO posts(title,description,field,image,author,readTime) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *';
+                const sql = 'INSERT INTO posts(title,description,html,field,image,author,readTime) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *';
                 const result = yield conn.query(sql, [
                     post.title,
                     post.description,
+                    post.html,
                     post.field,
                     post.image,
                     post.author,
-                    Math.ceil(post.description.split(' ').length / 100),
+                    Math.ceil(post.description.split(' ').length / 80),
                 ]);
                 conn.release();
                 return result.rows[0];

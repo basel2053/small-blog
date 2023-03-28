@@ -76,7 +76,7 @@ const create = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
         return next(new ApiError_1.default(`couldn't create user ${req.params.id}`, 404, 'failed while trying to create the user', true));
     }
     const confirmToken = (0, signToken_1.default)({ id: user.id }, JWT_EMAIL + '', JWT_EMAIL_EXPIRY + '');
-    const link = `http://localhost:3000/users/confirm/${confirmToken}`;
+    const link = `https://small-blog-api.onrender.com/users/confirm/${confirmToken}`;
     (0, mailing_1.default)(user.email, 'Email Confirmation', link, user.name);
     res.status(201).json({ message: 'user created', user });
 });
@@ -118,6 +118,8 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         res.cookie('refresh-token', refreshToken, {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
+            sameSite: 'none',
+            secure: true,
         });
         res.status(200).json({ id: user.id, name: user.name, accessToken: token });
     }
@@ -142,7 +144,7 @@ const forgotPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         yield reset.removeToken(user.id + '');
         yield reset.createToken(hashedToken, hashedCode, user.id);
         // NOTE saved hashs will be later compared to see if we really got valid request or not, resetToken valid for 15min, check if verified
-        const link = `http://localhost:5173/reset?token=${resetToken}&id=${user.id}`;
+        const link = `https://small-blog-api.onrender.com/reset?token=${resetToken}&id=${user.id}`;
         (0, mailing_1.default)(user.email, 'Password Reset Request', link, user.name, resetCode);
         res.status(200).send({ message: 'An E-mail has been sent.' });
     }
@@ -214,7 +216,9 @@ const confirmEmail = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             return next(new ApiError_1.default(`The Link expired or no user found.`, 403, "the user is trying to confirming an email which is alread confirmed or a user that doesn't exists", true));
         }
         yield store.confirmUser(id + '');
-        res.status(302).redirect('http://localhost:5173/login?confirmed=true');
+        res
+            .status(302)
+            .redirect('https://small-blog-react.vercel.app/login?confirmed=true');
     }
     catch (err) {
         res.sendStatus(403);
