@@ -24,7 +24,7 @@ const port = process.env.PORT || 3000;
 app.use(
   (0, cors_1.default)({
     credentials: true,
-    origin: 'https://small-blog-react.vercel.app/',
+    origin: '*',
   })
 );
 app.use((0, morgan_1.default)('dev'));
