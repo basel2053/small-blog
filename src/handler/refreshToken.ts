@@ -91,6 +91,9 @@ const refreshToken = async (
         res.cookie('refresh-token', newRefreshToken, {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
+          sameSite: 'none',
+          secure: true,
+          domain: 'small-blog-react.vercel.app',
         });
         res.json({
           message: 'user token refreshed',

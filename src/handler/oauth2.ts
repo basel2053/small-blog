@@ -63,6 +63,9 @@ const googleAuth = async (
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'none',
+      secure: true,
+      domain: 'small-blog-react.vercel.app',
     });
 
     res.status(200).json({ name: user.name, id: user.id, accessToken: token });
