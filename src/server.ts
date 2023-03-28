@@ -19,9 +19,19 @@ const app: express.Application = express();
 
 const port = process.env.PORT || 3000;
 
-app.use(
-  cors({ credentials: true, origin: 'https://small-blog-react.vercel.app' })
-);
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  next();
+});
+
+app.set('trust proxy', 1);
+
+app.use(cors({ credentials: true, origin: true }));
 
 app.use(morgan('dev'));
 app.use(cookieParser(process.env.COOKIE_SECRET));
