@@ -198,7 +198,7 @@ const authenticate = async (
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'none',
       secure: true,
-      domain: 'small-blog-react.vercel.app',
+      domain: 'vercel.app',
     });
 
     res.status(200).json({ id: user.id, name: user.name, accessToken: token });
