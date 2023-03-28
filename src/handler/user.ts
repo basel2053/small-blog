@@ -122,7 +122,7 @@ const create = async (
     JWT_EMAIL + '',
     JWT_EMAIL_EXPIRY + ''
   );
-  const link = `http://localhost:3000/users/confirm/${confirmToken}`;
+  const link = `https://small-blog-api.onrender.com/users/confirm/${confirmToken}`;
   mail(user.email, 'Email Confirmation', link, user.name);
   res.status(201).json({ message: 'user created', user });
 };
@@ -237,7 +237,7 @@ const forgotPassword = async (
     await reset.removeToken(user.id + '');
     await reset.createToken(hashedToken, hashedCode, user.id);
     // NOTE saved hashs will be later compared to see if we really got valid request or not, resetToken valid for 15min, check if verified
-    const link = `http://localhost:5173/reset?token=${resetToken}&id=${user.id}`;
+    const link = `https://small-blog-api.onrender.com/reset?token=${resetToken}&id=${user.id}`;
     mail(user.email, 'Password Reset Request', link, user.name, resetCode);
     res.status(200).send({ message: 'An E-mail has been sent.' });
   } catch (err) {
@@ -356,7 +356,9 @@ const confirmEmail = async (
       );
     }
     await store.confirmUser(id + '');
-    res.status(302).redirect('http://localhost:5173/login?confirmed=true');
+    res
+      .status(302)
+      .redirect('https://small-blog-react.vercel.app/login?confirmed=true');
   } catch (err) {
     res.sendStatus(403);
   }
