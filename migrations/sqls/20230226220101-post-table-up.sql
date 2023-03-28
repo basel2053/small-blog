@@ -1,1 +1,1 @@
-CREATE TABLE posts(id SERIAL PRIMARY KEY,title VARCHAR(100),description TEXT,field VARCHAR(30) ,image TEXT,author VARCHAR(50) REFERENCES users(name),readTime SMALLINT,createdAt VARCHAR(15) DEFAULT TO_CHAR(CURRENT_DATE, 'dd Mon yyyy'));
+CREATE TABLE posts(id SERIAL PRIMARY KEY,title VARCHAR(100),description TEXT,html TEXT,field VARCHAR(30) ,image TEXT,author VARCHAR(50) REFERENCES users(name),readTime SMALLINT,createdAt VARCHAR(15) DEFAULT TO_CHAR(CURRENT_DATE, 'dd Mon yyyy'));

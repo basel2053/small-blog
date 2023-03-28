@@ -5,6 +5,7 @@ export type TPost = {
   id?: number;
   title: string;
   description: string;
+  html: string;
   field: string;
   image: string;
   author: string;
@@ -65,10 +66,11 @@ export class Post {
         return null;
       }
       const sql2 =
-        'UPDATE posts SET title=$1,description=$2,image=$3, field=$4 WHERE id=$5 RETURNING *';
+        'UPDATE posts SET title=$1,description=$2,html=$3, image=$4, field=$5 WHERE id=$6 RETURNING *';
       const result2 = await conn.query(sql2, [
         post.title,
         post.description,
+        post.html,
         post.image ? post.image : result.rows[0].image,
         post.field,
         id,
@@ -102,14 +104,15 @@ export class Post {
     try {
       const conn = await Client.connect();
       const sql =
-        'INSERT INTO posts(title,description,field,image,author,readTime) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *';
+        'INSERT INTO posts(title,description,html,field,image,author,readTime) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *';
       const result = await conn.query(sql, [
         post.title,
         post.description,
+        post.html,
         post.field,
         post.image,
         post.author,
-        Math.ceil(post.description.split(' ').length / 100),
+        Math.ceil(post.description.split(' ').length / 80),
       ]);
       conn.release();
       return result.rows[0];
