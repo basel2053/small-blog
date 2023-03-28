@@ -19,7 +19,9 @@ const app: express.Application = express();
 
 const port = process.env.PORT || 3000;
 
-app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
+app.use(
+  cors({ credentials: true, origin: 'https://small-blog-react.vercel.app/' })
+);
 
 app.use(morgan('dev'));
 app.use(cookieParser(process.env.COOKIE_SECRET));
