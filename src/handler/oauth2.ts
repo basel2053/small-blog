@@ -41,7 +41,7 @@ const googleAuth = async (
       const randomNumber = Math.floor(1000 + Math.random() * 9000);
       user = await store.googleAuthRegister(
         payload.email,
-        `${payload.given_name} ${payload.family_name}#${randomNumber}`
+        `${payload.given_name} ${payload.family_name}${randomNumber}`
       );
     }
     // NOTE  we may check if user has a cookie, so we replace it
