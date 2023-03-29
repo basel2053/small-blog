@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import sharp from 'sharp';
-import { v4 as uuidv4 } from 'uuid';
 
 const optimizeImage = async (
   req: Request,
@@ -10,12 +9,25 @@ const optimizeImage = async (
   if (!req.file && req.method === 'PATCH') {
     return next();
   }
-  const folder = process.env.ENV === 'TEST' ? 'test_upload' : 'uploads';
-  const path = `${folder}/${uuidv4()} - ${req.file?.originalname}`;
   try {
-    await sharp(req.file?.buffer).resize(600, 400).toFile(path);
-    // NOTE  may optimize quality or extension later
-    req.body.image = path;
+    await sharp(req.file?.buffer)
+      .resize(600, 400)
+      .toBuffer()
+      .then(async (img) => {
+        fetch(
+          `https://www.filestackapi.com/api/store/S3?key=${process.env.FILESTACK_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'image/webp' },
+            body: img,
+          }
+        )
+          .then((r) => r.json())
+          .then((r) => {
+            req.body.image = r.url;
+          });
+      });
+
     next();
   } catch (err) {
     res.status(400).json({
