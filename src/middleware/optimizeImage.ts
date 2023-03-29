@@ -1,5 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import sharp from 'sharp';
+import ImageKit from 'imagekit';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const imagekit = new ImageKit({
+  publicKey: process.env.KIT_PUBLIC + '',
+  privateKey: process.env.KIT_PRIVATE + '',
+  urlEndpoint: process.env.KIT_URL + '',
+});
 
 const optimizeImage = async (
   req: Request,
@@ -10,24 +19,19 @@ const optimizeImage = async (
     return next();
   }
   try {
+    const filename = `${req.file?.originalname}-${Date.now()}`;
+
     await sharp(req.file?.buffer)
       .resize(600, 400)
       .toBuffer()
       .then(async (img) => {
-        fetch(
-          `https://www.filestackapi.com/api/store/S3?key=${process.env.FILESTACK_KEY}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'image/webp' },
-            body: img,
-          }
-        )
-          .then((r) => r.json())
-          .then((r) => {
-            req.body.image = r.url;
-          });
+        imagekit.upload({
+          file: img,
+          fileName: filename,
+          useUniqueFileName: false,
+        });
       });
-
+    req.body.image = `${process.env.KIT_URL}/${filename}`;
     next();
   } catch (err) {
     res.status(400).json({
