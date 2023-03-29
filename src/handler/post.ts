@@ -1,5 +1,4 @@
 import { Application, NextFunction, Request, Response } from 'express';
-import { unlink } from 'fs/promises';
 
 import { Post } from '../model/post';
 import upload from '../util/upload';
@@ -106,15 +105,6 @@ const update = async (
         )
       );
     }
-    if (req.body.image) {
-      try {
-        await unlink(post.image);
-      } catch (err) {
-        return res
-          .status(500)
-          .json({ warning: "Image wasn't deleted, path error", data: post });
-      }
-    }
     res.json({ message: 'post updated sucessfully', data: post.post });
   } catch (err) {
     throw new Error(`couldn't updated post , ${err}`);
@@ -137,7 +127,6 @@ const remove = async (
         )
       );
     }
-    await unlink(post.image);
     res.json({ message: 'posts deleted sucessfully', data: post });
   } catch (err) {
     throw new Error(`couldn't delete post , ${err}`);
