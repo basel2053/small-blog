@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sharp_1 = __importDefault(require("sharp"));
 const imagekit_1 = __importDefault(require("imagekit"));
+const uuid_1 = require("uuid");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const imagekit = new imagekit_1.default({
@@ -22,13 +23,13 @@ const imagekit = new imagekit_1.default({
     urlEndpoint: process.env.KIT_URL + '',
 });
 const optimizeImage = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a;
     if (!req.file && req.method === 'PATCH') {
         return next();
     }
     try {
-        const filename = `${(_a = req.file) === null || _a === void 0 ? void 0 : _a.originalname}_${Date.now()}`;
-        (0, sharp_1.default)((_b = req.file) === null || _b === void 0 ? void 0 : _b.buffer)
+        const filename = `${(0, uuid_1.v4)()}-${Date.now()}`;
+        (0, sharp_1.default)((_a = req.file) === null || _a === void 0 ? void 0 : _a.buffer)
             .resize(600, 400)
             .toBuffer()
             .then((img) => __awaiter(void 0, void 0, void 0, function* () {
