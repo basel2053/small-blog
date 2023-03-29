@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import sharp from 'sharp';
 import ImageKit from 'imagekit';
+import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const imagekit = new ImageKit({
@@ -19,7 +21,7 @@ const optimizeImage = async (
     return next();
   }
   try {
-    const filename = `${req.file?.originalname}_${Date.now()}`;
+    const filename = `${uuidv4()}-${Date.now()}`;
 
     sharp(req.file?.buffer)
       .resize(600, 400)
