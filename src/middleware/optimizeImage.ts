@@ -19,7 +19,7 @@ const optimizeImage = async (
     return next();
   }
   try {
-    const filename = `${req.file?.originalname}-${Date.now()}`;
+    const filename = `${req.file?.originalname}_${Date.now()}`;
 
     sharp(req.file?.buffer)
       .resize(600, 400)
